@@ -85,6 +85,34 @@
 	columnTemplate.strokeOpacity = 1;
 	columnTemplate.stroke = am4core.color("#ffffff");
 	columnTemplate.tooltipText = "{weekday}, {hour}: {value.workingValue.formatNumber('#.')}";
+	// heat legend
+	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
+	heatLegend.width = am4core.percent(100);
+	heatLegend.series = series;
+	heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
+	heatLegend.valueAxis.renderer.minGridDistance = 30;
+
+	// heat legend behavior
+	series.columns.template.events.on("over", function(event) {
+	  handleHover(event.target);
+	})
+
+	series.columns.template.events.on("hit", function(event) {
+	  handleHover(event.target);
+	})
+
+	function handleHover(column) {
+	  if (!isNaN(column.dataItem.value)) {
+		heatLegend.valueAxis.showTooltipAt(column.dataItem.value)
+	  }
+	  else {
+		heatLegend.valueAxis.hideTooltip();
+	  }
+	}
+
+	series.columns.template.events.on("out", function(event) {
+	  heatLegend.valueAxis.hideTooltip();
+	})
 
 	dataLayer.queryFeatures(query).then(function(results){
 		let dataset=[];
