@@ -94,7 +94,7 @@
 	columnTemplate.strokeWidth = 2;
 	columnTemplate.strokeOpacity = 1;
 	columnTemplate.stroke = am4core.color("#ffffff");
-	columnTemplate.tooltipText = "{weekday}, {hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate.tooltipText = "{week}, {hour}: {value.workingValue.formatNumber('#.')}";
 	// heat legend
 	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend.width = am4core.percent(100);
@@ -138,7 +138,7 @@
 				return (h < 10 ? '' : '') + h + ':00' + (h_24 < 12 ? 'am' : 'pm');
 			}			
 			dataset.push({
-				"week":a.attributes.DOW,
+				"week":a.attributes.week,
 				"hour":formatTimeShow(a.attributes.hour),
 				"value":a.attributes.Congestion_Score
 			});
