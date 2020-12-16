@@ -48,13 +48,13 @@
  */
  require(["esri/layers/FeatureLayer"],function(FeatureLayer){
 	var dataLayer = new FeatureLayer({
-          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/ArcGIS/rest/services/dow_and_tod_congestion_score/FeatureServer/0",
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/week_and_hour_congestion_score/FeatureServer",
           outFields: ["*"],
           visible: false
         });
 	var query = dataLayer.createQuery();
 	query.where = "1=1";
-	query.orderByFields = ["DOW ASC, TOD ASC"];
+	query.orderByFields = ["week ASC, hour ASC"];
 	// Apply chart themes
 	am4core.useTheme(am4themes_animated);
 
@@ -63,8 +63,8 @@
 	chart.responsive.enabled = true;
 	var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
 	var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
-	xAxis.dataFields.category = "hour";
-	yAxis.dataFields.category = "weekday";
+	xAxis.dataFields.category = "week";
+	yAxis.dataFields.category = "hour";
 
 	xAxis.renderer.grid.template.disabled = true;
 	xAxis.renderer.minGridDistance = 40;
@@ -74,8 +74,8 @@
 	yAxis.renderer.minGridDistance = 30;
 
 	var series = chart.series.push(new am4charts.ColumnSeries());
-	series.dataFields.categoryX = "hour";
-	series.dataFields.categoryY = "weekday";
+	series.dataFields.categoryX = "week";
+	series.dataFields.categoryY = "hour";
 	series.dataFields.value = "value";
 	series.sequencedInterpolation = true;
 	series.defaultState.transitionDuration = 3000;
@@ -131,36 +131,15 @@
 		for (i=0; i<returnsets.length; i++){
 			
 			a=returnsets[i];
-			switch (a.attributes.DOW) {
-			  case 1:
-				day = "Sunday";
-				break;
-			  case 2:
-				day = "Monday";
-				break;
-			  case 3:
-				day = "Tuesday";
-				break;
-			  case 4:
-				day = "Wednesday";
-				break;
-			  case 5:
-				day = "Thursday";
-				break;
-			  case 6:
-				day = "Friday";
-				break;
-			  case  7:
-				day = "Saturday";
-			}
+
 			function formatTimeShow(h_24) {
 				var h = h_24 % 12;
 				if (h === 0) h = 12;
 				return (h < 10 ? '' : '') + h + ':00' + (h_24 < 12 ? 'am' : 'pm');
 			}			
 			dataset.push({
-				"weekday":day,
-				"hour":formatTimeShow(a.attributes.TOD),
+				"week":a.attributes.DOW,
+				"hour":formatTimeShow(a.attributes.hour),
 				"value":a.attributes.Congestion_Score
 			});
 			
