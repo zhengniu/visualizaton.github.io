@@ -133,9 +133,11 @@
         });
 	// Apply chart themes
 	// Themes begin	
+	var query = dataLayer.createQuery();
 	am4core.useTheme(am4themes_animated);
 	// Themes end
-
+    // Default chart renderchart
+	renderchart("Toronto_Hwy 401 Express E");
 	var chart = am4core.create("chartdiv", am4charts.RadarChart);
 	chart.innerRadius = am4core.percent(30);
 	chart.fontSize = 11;
@@ -179,7 +181,7 @@
 	columnTemplate.strokeWidth = 2;
 	columnTemplate.strokeOpacity = 1;
 	columnTemplate.stroke = am4core.color("#ffffff");
-	columnTemplate.tooltipText = "{weekday}, {hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate.tooltipText = "{corridor} on {weekday} @ {hour}: {value.workingValue.formatNumber('#.')}";
 	columnTemplate.width = am4core.percent(100);
 	columnTemplate.height = am4core.percent(100);
 
@@ -248,9 +250,14 @@
     wellTypeSelect.addEventListener("change", function () {
         var corridor = event.target.value;
         console.log(corridor);
-		var query = dataLayer.createQuery();
+		
 		console.log("newValue: ", corridor);
-		condition="Corridor='"+corridor+"'";
+		renderchart(corridor);
+			  
+    });
+    
+	function renderchart(corridor){
+		var condition="Corridor='"+corridor+"'";
 		query.where = condition;
 		query.orderByFields = ["DOW ASC, Hour ASC"];
 
@@ -291,16 +298,16 @@
 				dataset.push({
 					"weekday":day,
 					"hour":formatTimeShow(a.attributes.Hour),
-					"value":a.attributes.Ad_Cong_Score 
+					"value":a.attributes.Ad_Cong_Score,
+                    "corridor":a.attributes.Corridor					
 				});
 				
 			}
 			
 			chart.data=dataset;
 		});
-			  
-    });
-
+	
+	}
 
 
  });
