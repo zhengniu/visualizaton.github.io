@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+
+
+  <style>
+	#circle circle {
+	  fill: none;
+	  pointer-events: all;
+	}
+
+	.group path {
+	  fill-opacity: .5;
+	}
+
+	path.chord {
+	  stroke: #000;
+	  stroke-width: .25px;
+	}
+
+	#circle:hover path.fade {
+	  display: none;
+	}
+	text{
+		white-space:pre;
+	}
+	#map {
+	  padding: 0;
+	  margin: 0;
+	  height: 100%;
+	  width: 100%;
+	}
+	.row {
+	  display: -webkit-box;
+	  display: -webkit-flex;
+	  display: -ms-flexbox;
+	  display:         flex;
+	  flex-wrap: wrap;
+	}
+	.row > [class*='col-'] {
+	  display: flex;
+	  flex-direction: column;
+	}
+	.padding-0{
+		padding-right:0;
+		padding-left:0;
+	}
+	.padding-1{
+		padding-right:10;
+	}
+	.labelplace{
+		display:inline-block;
+	}
+	.esriScalebar {
+      padding: 20px 20px;
+    }
+
+    .esriPopup.myTheme .titlePane,
+    .dj_ie7 .esriPopup.myTheme .titlePane .title {
+      background-color: #899752;
+      color: #333333;
+      font-weight: bold;
+    }
+
+    .esriPopup.myTheme .titlePane {
+      border-bottom: 1px solid #121310;
+    }
+
+    .esriPopup.myTheme a {
+      color: #d6e68a;
+    }
+    .esriPopup.myTheme .pointer.top{
+      background-color:#899752;
+    }
+    .esriPopup.myTheme .outerPointer,  .esriPopup.myTheme .pointer.bottom{
+      background-color:#424242;
+    }
+
+    .esriPopup.myTheme .contentPane,
+    .esriPopup.myTheme .actionsPane {
+      border-color: 1px solid #121310;
+      background-color: #424242;
+      color: #ffffff;
+    }
+	
+	.chart-wrapper {
+		background: #fff;
+		border: 1px solid #e2e2e2;
+		border-radius: 3px;
+		margin-bottom: 10px;
+	}
+	.chart-wrapper .chart-title {
+		border-bottom: 1px solid #d7d7d7;
+		color: #666;
+		font-size: 14px;
+		font-weight: 200;
+		padding: 7px 10px 4px;
+	}
+	.chart-wrapper .chart-stage {
+		overflow: hidden;
+		padding: 5px 10px;
+		position: relative;
+	}
+	
+	.btn {
+		background-color: DodgerBlue; /* Blue background */
+		border: none; /* Remove borders */
+		color: white; /* White text */
+		padding: 12px 16px; /* Some padding */
+		font-size: 16px; /* Set a font size */
+		cursor: pointer; /* Mouse pointer on hover */
+	}
+
+	/* Darker background on mouse-over */
+	.btn:hover {
+		background-color: RoyalBlue;
+	}	
+	
+	
+	.bootstrap-table .table > tbody > tr.groupBy {
+
+	}
+
+	.bootstrap-table .table > tbody > tr.groupBy.expanded {
+		
+	}
+	.bar {
+	  fill: steelblue;
+	}
+	.bar:hover {
+	  fill: brown;
+	}
+	
+	#out_bar_container {
+	  position: relative;
+	  width: 100%;
+	  max-width: 960px;
+	  margin: auto;
+	}
+	#to_bar_container {
+	  position: relative;
+	  width: 100%;
+	  max-width: 960px;
+	  margin: auto;
+	}
+
+	
+	.axis {
+	  font: 10px sans-serif;
+	}
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  
+	  stroke-width: 1px;
+	}
+	
+	.toolTip {
+	  position: absolute;
+	  display: none;
+	  min-width: 150px;
+	  min-height: 10px;
+	  background: none repeat scroll 0 0 #ffffff;
+	  border: 2px solid #6F257F;
+	  
+	  text-align: center;
+	}
+	<!--  panel -->
+	.panel-actions {
+	  margin-top: -20px;
+	  margin-bottom: 0;
+	  text-align: right;
+	}
+	.panel-actions a {
+	  color:#333;
+	}
+	.panel-fullscreen {
+		display: block;
+		z-index: 9999;
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		top: 0;
+		right: 0;
+		left: 0;
+		bottom: 0;
+		overflow: auto;
+	}
+	.panel{
+		margin-left: 0px;
+		margin-right: 0px;
+	}
+	h6
+	{
+		
+		margin:0;
+		padding:0;
+		display:inline;
+	}
+
+	ul
+	{
+		display: inline;
+		list-style: none;
+		float:right;
+	}
+	.overlay-content {
+		position: relative;
+		top: 5%; /* 25% from the top */
+		
+		width: 30%; /* 100% width */
+		text-align: center; /* Centered text/links */
+		margin-top: 30px; /* 30px top margin to avoid conflict with the close button on smaller screens */
+	}
+   </style>
+   	<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="//d3js.org/queue.v1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js" type="text/javascript"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	
+	<link rel="stylesheet" href="https://js.arcgis.com/3.24/esri/css/esri.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://js.arcgis.com/3.24/"></script>
+	<script src="bootstrap-table.js"></script>
+	<link href="bootstrap-table.css" type="text/css" />
+	
+	<script src="h_bar_chart.js"></script>
+ <head>
+ <body>
+ <header></header>
+   
+    <div class="container-fluid">
+	     <div class="row"> 
+			<div class="col-sm-12"><h3 >2016 Census 25% Sample Long-Form data on Place-of-residence to Place-of-work Flow Table at the CSD & CD Level</h3>
+				<h4>For illustrating the commuting flows in a Chord Diagram</h4>
+			</div>
+			
+		 </div>
+		 <div class="row">
+		    <div class="col-sm-6 padding-0">
+				<div class="row">
+			    <div class="col-sm-12 chart-wrapper">
+					<div class="chart-title">
+						Chord Diagram: Move mouse over label or path
+					</div>
+					<div class="chart-stage">
+						<div id="chorddiagm"></div>
+					</div>
+				</div>
+				</div>
+				<div class="row">
+				<div class="col-12 col-sm-6 chart-wrapper">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h6 class="panel-title"> From <div  id="OriginZone" class="labelplace"> </div></h6>
+							<ul class="list-inline panel-actions">
+								<li><a href="#" id="panel1-fullscreen" role="button" title="Toggle fullscreen"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+							</ul>
+						</div>
+						<div class="panel-body">
+							<div id="outtrips"></div>
+						</div>
+					</div>
+					<!-- <div class="chart-title">
+						From <div  id="OriginZone" class="labelplace"> </div>
+						
+					</div>
+					<div class="chart-stage">
+						<div id="outtrips"></div>
+					</div> -->
+				</div>
+				<div class="col-12 col-sm-6 chart-wrapper">
+<!-- 					<div class="chart-title">
+						To <div  id="DestZone" class="labelplace"> </div>
+						
+					</div>
+					<div class="chart-stage">
+						<div id="intotrips"></div>
+					</div> -->
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h6 class="panel-title"> To <div  id="DestZone" class="labelplace"> </div></h6>
+							<ul class="list-inline panel-actions">
+								<li><a href="#" id="panel2-fullscreen" role="button" title="Toggle fullscreen"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+							</ul>
+						</div>
+						<div class="panel-body">
+							<div id="intotrips"></div>
+						</div>
+					</div>					
+				</div>
+				</div>
+			</div>
+			<div class="col-sm-6 padding-0">
+				<div class="row padding-1">
+					<div class="col-sm-12 chart-wrapper">
+						<div class="chart-title">
+						<button id ="reset" class="btn"><i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+						<div  class="labelplace"></div>
+						<div  id="flowscount" class="labelplace"> </div>
+						</div>
+						<div class="chart-stage">
+							<div id="map"></div>
+						</div>
+					</div>
+					
+				</div>
+				<div class="row padding-1">
+					<div class="col-sm-12 chart-wrapper ">
+
+					 <table id="table" data-group-by="true" data-group-by-field="from" data-search="true" data-show-columns="true" data-pagination="true" data-page-size="10" data-show-toggle="true">
+						<thead>
+							<tr>
+								<th data-field="from" data-sortable="true">Origin </th>
+								<th data-field="to" data-sortable="true">Destination </th>
+								<th data-field="flows" data-sortable="true">Flows </th>
+								
+							</tr>
+						</thead>
+					</table>
+					</div>
+				</div>
+			</div>
+			
+		 </div>
+	</div>
+	<script>
+	    var csdname;
+	    var map;
+		var featureLayer;
+		var query;
+		require([
+			"esri/map",
+			"esri/layers/FeatureLayer","esri/dijit/Popup", "esri/dijit/PopupTemplate",
+			"esri/symbols/SimpleFillSymbol", "esri/Color","esri/symbols/SimpleLineSymbol","esri/tasks/query",
+			"dojo/dom-class", "dojo/dom-construct", 
+			"dojo/on",
+			"dojo/parser","dojo/_base/connect",
+			"dojo/domReady!"
+		  ],
+		  function(
+			Map,
+			FeatureLayer,
+			Popup, PopupTemplate,
+			SimpleFillSymbol,Color,SimpleLineSymbol,Query,
+			domClass, domConstruct,on, parser,connect
+		  ) {
+		    parser.parse();
+			var popup = new Popup({
+			  fillSymbol: new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+				new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+				  new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]))
+			}, domConstruct.create("div"));
+
+			domClass.add(popup.domNode, "myTheme");
+				
+			var map = new Map("map", {
+				basemap: "osm",
+				zoom: 7,
+				center:[-79.096, 43.608],
+				infoWindow: popup
+			});
+			var infoTemplate = new PopupTemplate({
+				fieldInfos:[{
+					fieldName:"CSDUID",visible: true,
+					label:"Census Subdivision ID"
+				},{
+					fieldName:"CSDNAME",visible: true,
+					label: "Census Subdivision Name"
+				}]
+			});
+			map.infoWindow.set("popupWindow", false);
+			/****************************************************************
+			 * Add feature layer - A FeatureLayer at minimum should point
+			 * to a URL to a feature service or point to a feature collection 
+			 * object.
+			 ***************************************************************/
+
+			// Carbon storage of trees in Warren Wilson College.
+			featureLayer = new FeatureLayer("https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/csd_samples/FeatureServer/0", {
+				outFields: [ "CSDUID", "CSDNAME" ],
+				infoTemplate: infoTemplate  
+			});
+
+			map.addLayer(featureLayer);
+		
+			query = new Query();
+			//==================================
+			//var width = 620,
+				//height = 820,
+				//outerRadius = Math.min(width, height) / 2 - 10,
+				//innerRadius = outerRadius - 24;
+			var margin = {left:50, top:50, right:50, bottom:50},
+				width =  600 - margin.left - margin.right, // more flexibility: Math.min(window.innerWidth, 1000)
+				height =  600 - margin.bottom, // same: Math.min(window.innerWidth, 1000)
+				innerRadius = Math.min(width, height) * .25,
+				
+				outerRadius = innerRadius * 1.2;
+				
+			var formatPercent = d3.format(".5");
+			console.log(width, height)
+			console.log( Math.min(width, height));
+			console.log("innerRadius ", innerRadius);
+			console.log("outerRadius ", outerRadius);
+
+			var arc = d3.svg.arc()
+				.innerRadius(innerRadius)
+				.outerRadius(outerRadius);
+
+			var layout = d3.layout.chord()
+				.padding(.04)
+				.sortSubgroups(d3.descending)
+				.sortChords(d3.ascending);
+
+			var path = d3.svg.chord()
+				.radius(innerRadius);
+
+			var svg = d3.select("#chorddiagm").append("svg")
+				//.attr("width", width)
+				//.attr("height", height)
+				.attr("preserveAspectRatio", "xMinYMin meet")
+				.attr("viewBox", "0 0 600 550")
+				
+			  .append("g")
+				.attr("id", "circle")
+				
+				.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+			svg.append("circle")
+				.attr("r", outerRadius);
+				
+
+			queue()
+				.defer(d3.csv, "ZoneDatabyCSD.csv")
+				.defer(d3.json, "matrixoutputbyCSD.json")
+				.await(ready);
+			var dataOD;
+			function ready(error, cities, matrix) {
+			  if (error) throw error;
+	 
+			  // Compute the chord layout.
+			  //console.log(cities);
+			  layout.matrix(matrix);
+			  
+			  // Add a group per neighborhood.
+			  var group = svg.selectAll("g.group")
+				  .data(layout.groups)
+				.enter().append("g")
+				  .attr("class", "group");
+				  //.on("mouseover", mouseover);
+			  
+			  //var citylist=[];
+			  // Add a mouseover title.
+			  var tot_flows=0;
+			  var tot_city_flows=[];
+			  group.append("title").text(function(d, i) {
+				//console.log(cities[i].name, d);
+				tot_flows+=d.value;
+				tot_city_flows.push({"name":cities[i].name, "flow":d.value});
+				return cities[i].name + ": " + formatPercent(d.value) + " of origins";
+			  });
+			  console.log("total flows", tot_flows);
+			  
+			  //console.log(citylist);
+			  // Add the group arc.
+			  var groupPath = group.append("path")
+				  .attr("id", function(d, i) { return "group" + i; })
+				  .attr("d", arc)
+				  .style("fill", function(d, i) { return cities[i].color; });
+
+			  // Add a text label.
+			  var groupText = group.append("text")
+				  .each(function(d) {  d.angle = (d.startAngle + d.endAngle) / 2; })
+				  .attr("x", 6)
+				  .attr("dy", 5)
+				  .attr("class", "titles")
+				  .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
+				  .attr("transform", function(d) {	  
+					return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+					+ "translate(" + (outerRadius + 20) + ")"
+					+ (d.angle > Math.PI ? "rotate(180)" : "");
+				  })
+				  .style("font-size", '10px')
+				   .text(function(d, i) { return cities[i].name; });
+
+			  //groupText.append("textPath")
+				  //.attr("xlink:href", function(d, i) { return "#group" + i; })
+
+				  //.text(function(d, i) { return cities[i].name; });
+
+			  // Remove the labels that don't fit. :(
+			  //groupText.filter(function(d, i) { 
+					
+					//return groupPath[0][i].getTotalLength() / 2 - 16 < this.getComputedTextLength(); 
+					//})
+				  //.remove();
+
+			  // Add the chords.
+			  var chord = svg.selectAll(".chord")
+				  .data(layout.chords)
+				.enter().append("path")
+				  .attr("class", "chord")
+				  .style("fill", function(d) { return cities[d.source.index].color; })
+				  .attr("d", path);
+
+			  // Add an elaborate mouseover title for each chord.
+			  chord.append("title").text(function(d) {
+				return cities[d.source.index].name
+					+ " → " + cities[d.target.index].name
+					+ ": " + formatPercent(d.source.value)
+					+ "\n" + cities[d.target.index].name
+					+ " → " + cities[d.source.index].name
+					+ ": " + formatPercent(d.target.value);
+			  });
+			 
+			  //#################################
+			  //OutofChart
+
+			  
+			  on(featureLayer, "click", function(e){
+				console.log(e)
+				csdname = e.graphic.attributes.CSDNAME;
+				console.log(csdname);
+				if (csdname){
+					var list_names=[];
+					var listname_target=[];
+					chord.classed("fade", function(p) {	
+						if (cities[p.source.index].name != csdname && cities[p.target.index].name != csdname){
+						
+							return cities[p.source.index].name != csdname
+							&& cities[p.target.index].name != csdname;	
+						}else {
+							if ($.inArray(cities[p.target.index].name, list_names)==-1){
+								list_names.push(cities[p.target.index].name);
+							}
+							if ($.inArray(cities[p.source.index].name, list_names)==-1){
+								list_names.push(cities[p.source.index].name);
+							}
+							listname_target.push({"from": cities[p.target.index].name , "to": cities[p.source.index].name, "flows":formatPercent(p.target.value)} );
+					
+							listname_target.push({"from":cities[p.source.index].name ,"to" :cities[p.target.index].name, "flows":formatPercent(p.source.value)});
+							
+						}
+						
+						var expression = "CSDNAME IN (";
+						var k;
+						for (k=0; k<list_names.length;k++){
+							//console.log(list_names[k]);
+							if (k===list_names.length-1){
+								expression+="'"+list_names[k]+"'";
+							}else{
+								expression+="'"+list_names[k]+"', ";
+							}
+
+						}
+						expression+=")";
+						//console.log(expression);
+						featureLayer.setDefinitionExpression(expression);
+					
+						
+					});
+					
+					console.log(list_names);
+					console.log(listname_target);
+					var select_flows=0;
+					$.each(tot_city_flows, function(i,d){
+						if (d.name===csdname){
+							select_flows=d.flow;
+						}
+					});
+					var flow_percent=(select_flows/tot_flows*100).toFixed(3);
+					$('#flowscount').html("Communiting flows of census sub-division <ins>"+ csdname+ "</ins> are " + select_flows.toLocaleString() + " ("+ flow_percent+ " %) of  total "+ tot_flows.toLocaleString() + " flows within the sample area.");
+					$('#OriginZone').html("<ins>"+ csdname+ "</ins>");
+					$('#DestZone').html("<ins>"+ csdname+ "</ins>");
+					console.log(select_flows);
+					dataOD=listname_target;
+					$('#table').bootstrapTable({});
+					$('#table').bootstrapTable(
+						"load", dataOD
+					);
+					
+					var outtrips=[],
+					totrips=[];
+					for (s=0; s<listname_target.length; s++){
+						console.log(listname_target[s]['from']);
+						if (listname_target[s]['from']!== csdname || listname_target[s]['to'] === csdname){
+							totrips.push({"from":listname_target[s]['from'], "flow":listname_target[s]['flows']});
+						}else if(listname_target[s]['from']=== csdname || listname_target[s]['from']=== csdname && listname_target[s]['to'] === csdname){
+							outtrips.push({"from":listname_target[s]['to'], "flow":listname_target[s]['flows']});
+						}
+						
+						
+					}
+					console.log(outtrips);
+					console.log(totrips);
+					var barmargin = { top: 10, left: 10, bottom: 10, right: 10 };
+					barheight = 800 , 
+					barwidth = 400 ;
+					d3.select("#outtrips").html("");
+					d3.select("#outtrips").append("svg")
+			
+						.attr('viewBox', "0, 0, " + (barwidth + barmargin.left + barmargin.right) + ", " + (barheight + barmargin.top + barmargin.bottom))
+						.attr('preserveAspectRatio', "xMidYMid meet")
+					  .append("g")
+						.attr("id", "out_bar_container")
+						;
+					//d3.select("#out_bar_container").append("rect")
+					//	.attr("width", barwidth)
+					//	.attr("height", barheight)
+					//	.style("fill", "#ccc")
+					var bar_h_chart = barChart(barwidth,barheight)
+						.x(function(d) { return d['flows']; })
+						.y(function(d) { return d['from']; })
+						.width(barwidth)
+						.height(barheight);
+					
+					d3.select("#out_bar_container")
+						.datum(outtrips)
+						.call(bar_h_chart);
+				  //====================================
+				    d3.select("#intotrips").html("");
+					d3.select("#intotrips").append("svg")
+						.attr('viewBox', "0, 0, " + (barwidth + barmargin.left + barmargin.right) + ", " + (barheight + barmargin.top + barmargin.bottom))
+						.attr('preserveAspectRatio', "xMinYMid meet")
+					  .append("g")
+						.attr("id", "to_bar_container")
+						;
+					//d3.select("#out_bar_container").append("rect")
+					//	.attr("width", barwidth)
+					//	.attr("height", barheight)
+					//	.style("fill", "#ccc")
+					var bar_h_chart_to = barChart(barwidth,barheight)
+						.x(function(d) { return d['flows']; })
+						.y(function(d) { return d['from']; })
+						.width(barwidth)
+						.height(barheight);
+					
+					d3.select("#to_bar_container")
+						.datum(totrips)
+						.call(bar_h_chart_to);
+				}
+	
+			  });
+			 
+			  $('#reset').click(function(){
+				console.log("Clicked");
+				featureLayer.setDefinitionExpression('');
+				chord.classed("fade", false);
+			  });
+			 
+			}		
+			//==================================
+			/**
+			 * @author: Dennis Hernández
+			 * @webSite: http://djhvscf.github.io/Blog
+			 * @version: v1.0.0
+			 */
+
+
+
+		    //==================================
+	
+			
+		});
+
+		$("#panel1-fullscreen").click(expandfull);
+		$("#panel2-fullscreen").click(expandfull);
+		function expandfull (e) {
+			e.preventDefault();
+			
+			var $this = $(this);
+			var bar_width = $(".panel-body").find("svg").width();
+			var	bar_height = $(".panel-body").find("svg").height();
+			if ($this.children('i').hasClass('glyphicon-resize-full'))
+			{
+				$this.children('i').removeClass('glyphicon-resize-full');
+				$this.children('i').addClass('glyphicon-resize-small');
+			
+				
+			}
+			else if ($this.children('i').hasClass('glyphicon-resize-small'))
+			{
+				$this.children('i').removeClass('glyphicon-resize-small');
+				$this.children('i').addClass('glyphicon-resize-full');
+				
+			}
+			$(this).closest('.panel').toggleClass('panel-fullscreen');
+			
+
+			if ($(this).closest('.panel').hasClass('panel-fullscreen')){
+				var panelwid=$(this).closest('.panel').width();
+				var panelhei=$(this).closest('.panel').height();
+				console.log(panelwid, " ", panelhei);
+				$(".panel-body").find("svg").addClass('overlay-content');
+			}else{
+				$(".panel-body").find("svg").removeClass('overlay-content');
+			
+			}
+			
+		}
+
+    </script>
+ </body>
+</html>
