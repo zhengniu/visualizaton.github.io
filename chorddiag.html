@@ -437,7 +437,7 @@
 
 			queue()
 				.defer(d3.csv, "ZoneDatabyCSD.csv")
-				.defer(d3.json, "matrixoutputbyCSD.json")
+				.defer(d3.json, "https://zhengniu.github.io/visualizaton.github.io/matrixoutputbyCSD.JSON")
 				.await(ready);
 			var dataOD;
 			function ready(error, cities, matrix) {
