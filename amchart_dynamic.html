@@ -148,6 +148,13 @@
 	chart.fontSize = 11;
 	chart.responsive.enabled = true;
 	
+	var chartlabel = chart.chartContainer.createChild(am4core.Label);
+	chartlabel.text="Congestion score: 0 (no reported jams); 1 - 100 (the higher the score, the worse the congestion)";
+	chartlabel.align = "center";
+	var charttitle = chart.titles.create();
+	charttitle.text = "Toronto_Hwy 401 Express E";
+	charttitle.fontSize = 16;
+	charttitle.marginBottom = 5;
 	var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
 	var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
 	yAxis.renderer.minGridDistance = 5;
@@ -301,14 +308,15 @@
     wellTypeSelect.addEventListener("change", function () {
         var corridor = event.target.value;
 		renderchart(corridor);
-		showIndicator();	  
+		showIndicator();	
+        charttitle.text = corridor;
+				
     });
     
 	function renderchart(corridor){
 		var condition="Corridor='"+corridor+"'";
 		query.where = condition;
 		query.orderByFields = ["DOW ASC, Hour ASC"];
-
 		dataLayer.queryFeatures(query).then(function(results){
 			let dataset=[];
 			
