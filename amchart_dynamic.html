@@ -145,12 +145,13 @@
 	renderchart("Toronto_Hwy 401 Express E");
 	var chart = am4core.create("chartdiv", am4charts.RadarChart);
 	chart.innerRadius = am4core.percent(30);
-	chart.fontSize = 11;
+	chart.fontSize = 12;
 	chart.responsive.enabled = true;
 	
 	var chartlabel = chart.chartContainer.createChild(am4core.Label);
-	chartlabel.text="Congestion score: 0 (no reported jams); 1 - 100 (the higher the score, the worse the congestion)";
+	chartlabel.text="Congestion score: 0 (no reported jams); 1 - 30 (the higher the score, the worse the congestion)";
 	chartlabel.align = "center";
+	chartlabel.fontsize= 14;
 	var charttitle = chart.titles.create();
 	charttitle.text = "Toronto_Hwy 401 Express E";
 	charttitle.fontSize = 16;
