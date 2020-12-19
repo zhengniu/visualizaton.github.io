@@ -104,8 +104,8 @@
 			<div class="chart-notes">
 			</div>
 		</div>
-	  </div>
- <div class="row">
+    </div>		
+	<div class="row">
 		<div class="col-md-12 col-sm-12" >
 			<div class="chart-wrapper">
 			  <div class="chart-title">
@@ -227,7 +227,54 @@
 	  heatLegend.valueAxis.hideTooltip();
 	})	
 	
+	chart.events.on("ready", function(ev){
+		hideIndicator();
+	});
 
+	let indicator;
+	let indicatorInterval;
+
+	function showIndicator() {
+	  if (!indicator) {
+		indicator = chart.tooltipContainer.createChild(am4core.Container);
+		indicator.background.fill = am4core.color("#fff");
+		indicator.width = am4core.percent(100);
+		indicator.height = am4core.percent(100);
+
+		var indicatorLabel = indicator.createChild(am4core.Label);
+		indicatorLabel.text = "Loading stuff...";
+		indicatorLabel.align = "center";
+		indicatorLabel.valign = "middle";
+		indicatorLabel.dy = 50;
+		
+		var hourglass = indicator.createChild(am4core.Image);
+		hourglass.href = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-160/hourglass.svg";
+		hourglass.align = "center";
+		hourglass.valign = "middle";
+		hourglass.horizontalCenter = "middle";
+		hourglass.verticalCenter = "middle";
+		hourglass.scale = 0.7;
+	  }
+
+	  indicator.hide(0);
+	  indicator.show();
+
+	  clearInterval(indicatorInterval);
+	  indicatorInterval = setInterval(function() {
+		hourglass.animate([{
+		  from: 0,
+		  to: 360,
+		  property: "rotation"
+		}], 2000);
+	  }, 3000);
+	}
+
+	function hideIndicator() {
+	  indicator.hide();
+	  clearInterval(indicatorInterval);
+	}
+
+	showIndicator();
 	var wellTypeSelect = document.getElementById("hwynames");
 	uniqueValues({
 	  layer: dataLayer,
@@ -254,7 +301,7 @@
     wellTypeSelect.addEventListener("change", function () {
         var corridor = event.target.value;
 		renderchart(corridor);
-			  
+		showIndicator();	  
     });
     
 	function renderchart(corridor){
@@ -348,7 +395,7 @@
 				}			
 				
 			}
-			
+			hideIndicator();
 			chart.data=timeseries_dataset;
 		});
 	
