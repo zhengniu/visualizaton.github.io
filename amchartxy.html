@@ -125,27 +125,28 @@
 	})
 
 	dataLayer.queryFeatures(query).then(function(results){
-		let dataset=[];
-		
-		returnsets=results.features
-		for (i=0; i<returnsets.length; i++){
-			
-			a=returnsets[i];
-
-			function formatTimeShow(h_24) {
-				var h = h_24 % 12;
-				if (h === 0) h = 12;
-				return (h < 10 ? '' : '') + h + ':00' + (h_24 < 12 ? 'am' : 'pm');
-			}			
-			dataset.push({
-				"week":a.attributes.week,
-				"hour":formatTimeShow(a.attributes.hour),
-				"value":a.attributes.Congestion_Score
-			});
-			
+		returnsets=results.features;
+		let timeseries_dataset=[];		
+		for (j=25; j<54; j++){
+			for (k=0; k<24; k++){
+				timeseries_dataset.push({
+					"value":0,
+					"week":j,
+					"hour":k
+					
+				});
+			}
 		}
+		for (i=0; i<returnsets.length; i++){
+			a=returnsets[i];
+			for (f=0;f<timeseries_dataset.length;f++){
+				if (timeseries_dataset[f].week ==a.attributes.week && timeseries_dataset[f].hour==a.attributes.hour){
+						timeseries_dataset[f].value=a.attributes.Congestion_Score;
+				}
+			}
+		}
+		chart.data=timeseries_dataset;
 		
-		chart.data=dataset;
 	});
 
  });
