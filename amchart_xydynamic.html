@@ -187,7 +187,7 @@
 	columnTemplate.strokeWidth = 2;
 	columnTemplate.strokeOpacity = 1;
 	columnTemplate.stroke = am4core.color("#ffffff");
-	columnTemplate.tooltipText = "{week}, {hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate.tooltipText = "In Week {week} @ {hour}: {value.workingValue.formatNumber('#.')}";
 	// heat legend
 	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend.width = am4core.percent(100);
