@@ -1,0 +1,592 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+  <meta name="description" content="The Ontario Ministry of Transportation iCorridor service provides better understanding of historical, real-time, and forecast information in transportation and land use planning.As the public accessible website, iCorridor supports Ontario's Open Government initiative which makes government information more transparent to the general public. It includes project based land use planning boundaries and detailed demographic data, travel behaviour information (mode shares, highway traffic, and commercial vehicle characteristics), information on road and highway (travel speed and performance indices).">
+  <meta name="author" content="Systems Analysis and Forecasting Office, Ontario Ministry of Transportation">
+  <meta name="keywords" content="Congestion, Transportation, GPS, land use, Truck, Car, Survey, Commercial, Passenger, Forecast, Planning, Highway, Provincial, iCorridor, Corridor,GGH, Greater Golden Horseshoe, GO, Transit, AADT, AADTT, Traffic Volume, Delay, Travel Time, Collision, LHRS, Milepost, Greenbelt, GTHA, Transportation Planning, Transportation Forecasting">
+  
+  <title>iCorridor Traffic Analytics Dashboard</title>
+<!--   <link rel="shortcut icon" href="assets/img/favicon.ico">
+  <link rel="icon" type="image/png" href="assets/img/favicon-32x32.ico" sizes="32x32" />
+  <link rel="icon" type="image/png" href="img/favicon-16x16.ico" sizes="16x16" /> -->
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+  <style>
+	a {
+		text-decoration: none;
+		display: inline-block;
+		padding: 8px 16px;
+	}
+
+	a:hover {
+		background-color: #ddd;
+		color: black;
+	}
+
+	.previous {
+		background-color: #f1f1f1;
+		color: black;
+	}
+
+	.next {
+		background-color: #4CAF50;
+		color: white;
+	}
+
+	.round {
+		border-radius: 50%;
+	}
+
+	li {listt-style: none;}
+	.specialli {}
+	body {
+	  position: relative;
+
+	}
+	li {listt-style: none;}
+	.specialli {}
+	.form-group {
+	  margin-bottom: 0;
+	  text-align: left;
+	}
+
+	#chartdiv {
+	  width: 100%;
+	  height: 450px;
+	}
+	#dow_hour_chartdiv {
+	  width: 100%;
+	  height: 450px;
+	}
+	.control-label{margin: 0 auto;text-align: center;}
+	.row{
+		padding: 5px 10px;
+		
+	}
+  </style>
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js" type="text/javascript"></script>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+ <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js" type="text/javascript"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css" /> -->
+  <!-- <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script> -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/holder/2.3.2/holder.min.js" type="text/javascript"></script>
+
+  <script>
+    Holder.add_theme("white", { background:"#fff", foreground:"#a7a7a7", size:10 });
+  </script>
+ 
+  <!-- arcgis api js-->
+
+  <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+  <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+  <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+  <script src="https://js.arcgis.com/4.17/"></script>
+  
+</head>
+<body style="padding-top: 5px;">
+
+  <div class="container-fluid">
+    <div class="row">
+	    <div class="col-sm-12 col-md-12">
+			<div class="chart-title">
+			</div>
+			<div class="chart-stage">
+				<div id="grid-1-1">
+					<label class='control-label'>Corridor:</label>
+					<select id='hwynames' class='target form-control'>
+						<option value=" ">Select a Corridor</option>
+					</select>
+				</div>
+			</div>
+			<div class="chart-notes">
+			</div>
+		</div>
+    </div>		
+	<div class="row">
+		<div class="col-md-6 col-sm-12" >
+			<div class="chart-wrapper">
+			  <div class="chart-title">
+
+			  </div>
+			  <div class="chart-stage">
+				<div id="grid-1-1">
+
+					<div id="dow_hour_chartdiv"></div>
+				</div>
+			  </div>
+			  <div class="chart-notes">
+			  </div>
+			</div>
+		</div> 
+		<div class="col-md-6 col-sm-12" >
+			<div class="chart-wrapper">
+			  <div class="chart-title">
+
+			  </div>
+			  <div class="chart-stage">
+				<div id="grid-1-1">
+
+					<div id="chartdiv"></div>
+				</div>
+			  </div>
+			  <div class="chart-notes">
+			  </div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+ 
+</body>
+<script>
+
+ require(["esri/layers/FeatureLayer","esri/smartMapping/statistics/uniqueValues"],function(FeatureLayer, uniqueValues){
+	var dataLayer_dow_hour = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_corridor_dow_hour/FeatureServer/0",
+          outFields: ["*"],
+          visible: false
+        });
+	// Apply chart themes
+	// Themes begin	
+	var query_dow_hour = dataLayer_dow_hour.createQuery();
+	am4core.useTheme(am4themes_animated);
+	// Themes end
+    // Default chart renderchart
+	
+	var chart_dow_hour = am4core.create("dow_hour_chartdiv", am4charts.RadarChart);
+	chart_dow_hour.innerRadius = am4core.percent(30);
+	chart_dow_hour.fontSize = 12;
+	chart_dow_hour.responsive.enabled = true;
+	chart_dow_hour.exporting.menu = new am4core.ExportMenu();
+	var chartlabel_dow_hour = chart_dow_hour.chartContainer.createChild(am4core.Label);
+	chartlabel_dow_hour.text="Congestion score: 0 (no reported jams)";
+	chartlabel_dow_hour.align = "center";
+	chartlabel_dow_hour.fontsize= 16;
+	var charttitle_dow_hour = chart_dow_hour.titles.create();
+	charttitle_dow_hour.text = "Hwy 401 Express E_Toronto";
+	charttitle_dow_hour.fontSize = 16;
+	charttitle_dow_hour.marginBottom = 5;
+	var xAxis_dow_hour = chart_dow_hour.xAxes.push(new am4charts.CategoryAxis());
+	var yAxis_dow_hour = chart_dow_hour.yAxes.push(new am4charts.CategoryAxis());
+	yAxis_dow_hour.renderer.minGridDistance = 5;
+
+	xAxis_dow_hour.renderer.labels.template.location = 0.5;
+	xAxis_dow_hour.renderer.labels.template.bent = true;
+	xAxis_dow_hour.renderer.labels.template.radius = 5;
+
+	xAxis_dow_hour.dataFields.category = "Hour";
+	yAxis_dow_hour.dataFields.category = "weekday";
+
+	xAxis_dow_hour.renderer.grid.template.disabled = true;
+	xAxis_dow_hour.renderer.minGridDistance = 10;
+
+	yAxis_dow_hour.renderer.grid.template.disabled = true;
+	yAxis_dow_hour.renderer.inversed = true;
+
+	// this makes the y axis labels to be bent. By default y Axis labels are regular AxisLabels, so we replace them with AxisLabelCircular
+	// and call fixPosition for them to be bent
+	var yAxisLabel_dow_hour = new am4charts.AxisLabelCircular();
+	yAxisLabel_dow_hour.bent = true;
+	yAxisLabel_dow_hour.events.on("validated", function(event){  
+	  event.target.fixPosition(-90, am4core.math.getDistance({x:event.target.pixelX, y:event.target.pixelY}) - 5);
+	  event.target.dx = -event.target.pixelX;
+	  event.target.dy = -event.target.pixelY;
+	})
+	yAxis_dow_hour.renderer.labels.template = yAxisLabel_dow_hour;
+
+	var series_dow_hour = chart_dow_hour.series.push(new am4charts.RadarColumnSeries());
+	series_dow_hour.dataFields.categoryX = "Hour";
+	series_dow_hour.dataFields.categoryY = "weekday";
+	series_dow_hour.dataFields.value = "value";
+	series_dow_hour.sequencedInterpolation = true;
+
+	var columnTemplate_dow_hour = series_dow_hour.columns.template;
+	columnTemplate_dow_hour.strokeWidth = 2;
+	columnTemplate_dow_hour.strokeOpacity = 1;
+	columnTemplate_dow_hour.stroke = am4core.color("#ffffff");
+	columnTemplate_dow_hour.tooltipText = "{corridor} on {weekday} @ {Hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate_dow_hour.width = am4core.percent(100);
+	columnTemplate_dow_hour.height = am4core.percent(100);
+
+	chart_dow_hour.seriesContainer.zIndex = -5;
+
+	columnTemplate_dow_hour.hiddenState.properties.opacity = 0;
+
+	// heat rule, this makes columns to change color depending on value
+	series_dow_hour.heatRules.push({ target: columnTemplate_dow_hour, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109") });
+
+	// heat legend
+
+	var heatLegend_dow_hour = chart_dow_hour.bottomAxesContainer.createChild(am4charts.HeatLegend);
+	heatLegend_dow_hour.width = am4core.percent(100);
+	heatLegend_dow_hour.series = series_dow_hour;
+	heatLegend_dow_hour.valueAxis.renderer.labels.template.fontSize = 9;
+	heatLegend_dow_hour.valueAxis.renderer.minGridDistance = 30;
+
+	// heat legend behavior
+	series_dow_hour.columns.template.events.on("over", function (event) {
+	  handleHover_dow(event.target);
+	})
+
+	series_dow_hour.columns.template.events.on("hit", function (event) {
+	  handleHover_dow(event.target);
+	})
+    /////////////////////////////xydynaminc - end////////////////////////////////////
+	var dataLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_corridor_week_hour/FeatureServer/0",
+          outFields: ["*"],
+          visible: false
+        });
+	// Apply chart themes
+	// Themes begin	
+	var query = dataLayer.createQuery();
+	renderchart("Hwy 401 Express E_Toronto");
+	// Apply chart themes
+	am4core.useTheme(am4themes_animated);
+
+	var chart = am4core.create("chartdiv", am4charts.XYChart);
+	chart.maskBullets = false;
+	chart.responsive.enabled = true;
+	chart.exporting.menu = new am4core.ExportMenu();
+	var chartlabel = chart.chartContainer.createChild(am4core.Label);
+	chartlabel.text="Congestion score: 0 (no reported jams)";
+	chartlabel.align = "center";
+	chartlabel.fontsize= 10;
+	var charttitle = chart.titles.create();
+	charttitle.text = "Hwy 401 Express E_Toronto";
+	charttitle.fontSize = 16;
+	charttitle.marginBottom = 5;
+	var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+	var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+	xAxis.dataFields.category = "week";
+	yAxis.dataFields.category = "hour";
+
+	xAxis.renderer.grid.template.disabled = true;
+	xAxis.renderer.minGridDistance = 40;
+
+	yAxis.renderer.grid.template.disabled = true;
+	yAxis.renderer.inversed = true;
+	yAxis.renderer.minGridDistance = 30;
+
+	var series = chart.series.push(new am4charts.ColumnSeries());
+	series.dataFields.categoryX = "week";
+	series.dataFields.categoryY = "hour";
+	series.dataFields.value = "value";
+	series.sequencedInterpolation = true;
+	series.defaultState.transitionDuration = 3000;
+	series.columns.template.width = am4core.percent(100);
+	series.columns.template.height = am4core.percent(100);
+
+	series.heatRules.push({
+	  "target": series.columns.template,
+	  "property": "fill",
+	  "min": am4core.color("#e6e6e6"),
+	  "max": am4core.color("#e40109"),
+	  "dataField": "value"
+	});
+
+	var columnTemplate = series.columns.template;
+	columnTemplate.strokeWidth = 2;
+	columnTemplate.strokeOpacity = 1;
+	columnTemplate.stroke = am4core.color("#ffffff");
+	columnTemplate.tooltipText = "{week}, {hour}: {value.workingValue.formatNumber('#.')}";
+	// heat legend
+	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
+	heatLegend.width = am4core.percent(100);
+	heatLegend.series = series;
+	heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
+	heatLegend.valueAxis.renderer.minGridDistance = 30;
+
+	// heat legend behavior
+	series.columns.template.events.on("over", function(event) {
+	  handleHover(event.target);
+	})
+
+	series.columns.template.events.on("hit", function(event) {
+	  handleHover(event.target);
+	})	
+	series.columns.template.events.on("out", function (event) {
+	  heatLegend.valueAxis.hideTooltip();
+	})	
+	
+	chart.events.on("ready", function(ev){
+		hideIndicator();
+	});
+	function handleHover(column) {
+	  if (!isNaN(column.dataItem.value)) {
+		//heatLegend_dow_hour.valueAxis.showTooltipAt(column.dataItem.value);
+		heatLegend.valueAxis.showTooltipAt(column.dataItem.value)
+	  }
+	  else {
+		//heatLegend_dow_hour.valueAxis.hideTooltip();
+		heatLegend.valueAxis.hideTooltip();
+	  }
+	}
+	//////////////////////////////////////xydynamic////////////////////////////////
+	function handleHover_dow(column) {
+	  if (!isNaN(column.dataItem.value)) {
+		heatLegend_dow_hour.valueAxis.showTooltipAt(column.dataItem.value);
+		//heatLegend.valueAxis.showTooltipAt(column.dataItem.value)
+	  }
+	  else {
+		heatLegend_dow_hour.valueAxis.hideTooltip();
+		//heatLegend.valueAxis.hideTooltip();
+	  }
+	}
+
+	series_dow_hour.columns.template.events.on("out", function (event) {
+	  heatLegend_dow_hour.valueAxis.hideTooltip();
+	})	
+	
+	chart_dow_hour.events.on("ready", function(ev){
+		hideIndicator();
+	});
+
+	let indicator;
+	let indicator_dow;
+	let indicatorInterval;
+
+	function showIndicator() {
+	  if (!indicator) {
+		indicator = chart.tooltipContainer.createChild(am4core.Container);
+
+		indicator.background.fill = am4core.color("#fff");
+		indicator.width = am4core.percent(100);
+		indicator.height = am4core.percent(100);
+
+		var indicatorLabel = indicator.createChild(am4core.Label);
+		indicatorLabel.text = "Loading stuff...";
+		indicatorLabel.align = "center";
+		indicatorLabel.valign = "middle";
+		indicatorLabel.dy = 50;
+		
+		var hourglass = indicator.createChild(am4core.Image);
+		hourglass.href = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-160/hourglass.svg";
+		hourglass.align = "center";
+		hourglass.valign = "middle";
+		hourglass.horizontalCenter = "middle";
+		hourglass.verticalCenter = "middle";
+		hourglass.scale = 0.7;
+	  }
+	  if (!indicator_dow) {
+		indicator_dow = chart_dow_hour.tooltipContainer.createChild(am4core.Container);
+
+		indicator_dow.background.fill = am4core.color("#fff");
+		indicator_dow.width = am4core.percent(100);
+		indicator_dow.height = am4core.percent(100);
+
+		var indicatorLabel = indicator_dow.createChild(am4core.Label);
+		indicatorLabel.text = "Loading stuff...";
+		indicatorLabel.align = "center";
+		indicatorLabel.valign = "middle";
+		indicatorLabel.dy = 50;
+		
+		var hourglass = indicator_dow.createChild(am4core.Image);
+		hourglass.href = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-160/hourglass.svg";
+		hourglass.align = "center";
+		hourglass.valign = "middle";
+		hourglass.horizontalCenter = "middle";
+		hourglass.verticalCenter = "middle";
+		hourglass.scale = 0.7;
+	  }	 
+
+	  indicator.hide(0);
+	  indicator.show();
+	  indicator_dow.hide(0);
+	  indicator_dow.show();
+	  clearInterval(indicatorInterval);
+	  indicatorInterval = setInterval(function() {
+		hourglass.animate([{
+		  from: 0,
+		  to: 360,
+		  property: "rotation"
+		}], 2000);
+	  }, 3000);
+	}
+
+	function hideIndicator() {
+	  indicator.hide();
+	  indicator_dow.hide();
+	  clearInterval(indicatorInterval);
+	}
+
+	showIndicator();
+	
+	var wellTypeSelect = document.getElementById("hwynames");
+	uniqueValues({
+	  layer: dataLayer_dow_hour,
+	  field: "Corridor"
+	}).then(function(response){
+		var infos = response.uniqueValueInfos;
+        var corridors = [];
+		infos.forEach(function(info){
+
+			corridors.push(info.value);
+						
+		});
+		return corridors;
+	}).then(addtoSelect);
+	function addtoSelect(values){
+		values.sort();
+		values.forEach(function(infovalue){
+			var option = document.createElement("option");
+            option.text = infovalue;
+            wellTypeSelect.add(option);
+		});
+		
+	}
+    wellTypeSelect.addEventListener("change", function () {
+        var corridor = event.target.value;
+		renderchart(corridor);
+		showIndicator();
+        charttitle_dow_hour.text = corridor;
+		charttitle.text = corridor;		
+    });
+    
+	function renderchart(corridor){
+		var condition="Corridor='"+corridor+"'";
+		///////////////xydynamic////////////////////////////////
+		query.where = condition;
+		query.orderByFields = ["Week ASC, Hour ASC"];
+		dataLayer.queryFeatures(query).then(function(results){
+			
+			returnsets=results.features;
+			let unique_corridors=[];
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				if (!unique_corridors.includes(a.attributes.Corridor)) {
+				  unique_corridors.push(a.attributes.Corridor);
+				}
+			}
+			let timeseries_data=[];	
+			for (i=0;i<unique_corridors.length; i++){			
+				for (j=25; j<54; j++){
+					for (k=0; k<24; k++){
+						timeseries_data.push({
+							"value":0,
+							"week":j,
+							"hour":k,
+							"corridor":unique_corridors[i]
+							
+						});
+					}
+				}
+			}
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				for (f=0;f<timeseries_data.length;f++){
+					if (timeseries_data[f].corridor ==a.attributes.Corridor&&timeseries_data[f].week ==a.attributes.Week && timeseries_data[f].hour==a.attributes.Hour){
+							timeseries_data[f].value=a.attributes.Congestion_Score;
+					}
+				}
+			}
+			hideIndicator();
+			chart.data=timeseries_data;
+		});		
+		///////////////xydynamic////////////////////////////////
+		query_dow_hour.where = condition;
+		query_dow_hour.orderByFields = ["DOW ASC, Hour ASC"];
+		dataLayer_dow_hour.queryFeatures(query_dow_hour).then(function(results){
+			let dataset=[];
+			
+			returnsets=results.features;
+			let unique_corridor=[];
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				if (!unique_corridor.includes(a.attributes.Corridor)) {
+				  unique_corridor.push(a.attributes.Corridor);
+				}
+			}
+			
+			let timeseries_dataset=[];
+			for (i=0;i<unique_corridor.length; i++){
+				for (j=1; j<8; j++){
+					switch (j) {
+					  case 1:
+						cday = "Sunday";
+						break;
+					  case 2:
+						cday = "Monday";
+						break;
+					  case 3:
+						cday = "Tuesday";
+						break;
+					  case 4:
+						cday = "Wednesday";
+						break;
+					  case 5:
+						cday = "Thursday";
+						break;
+					  case 6:
+						cday = "Friday";
+						break;
+					  case  7:
+						cday = "Saturday";
+					}
+					for (k=0; k<24; k++){
+					    
+						timeseries_dataset.push({
+						    "value":0,
+							"weekday":cday,
+							"Hour":k,
+							"corridor":unique_corridor[i]
+						});
+					}
+				}
+			}
+			
+			for (i=0; i<returnsets.length; i++){
+				
+				a=returnsets[i];
+				switch (a.attributes.DOW) {
+				  case 1:
+					day = "Sunday";
+					break;
+				  case 2:
+					day = "Monday";
+					break;
+				  case 3:
+					day = "Tuesday";
+					break;
+				  case 4:
+					day = "Wednesday";
+					break;
+				  case 5:
+					day = "Thursday";
+					break;
+				  case 6:
+					day = "Friday";
+					break;
+				  case  7:
+					day = "Saturday";
+				}
+				function formatTimeShow(h_24) {
+					var h = h_24 % 12;
+					if (h === 0) h = 12;
+					return (h < 10 ? '' : '') + h  +' '+ (h_24 < 12 ? 'am' : 'pm');
+				}
+                for (f=0;f<timeseries_dataset.length;f++){
+					if (timeseries_dataset[f].corridor ==a.attributes.Corridor && timeseries_dataset[f].weekday ==day && timeseries_dataset[f].Hour==a.attributes.Hour){
+						timeseries_dataset[f].value=a.attributes.Ad_Cong_Score;
+					}
+				}			
+				
+			}
+			hideIndicator();
+			chart_dow_hour.data=timeseries_dataset;
+		});
+	
+	}
+
+
+ });
+</script>
+</html>
