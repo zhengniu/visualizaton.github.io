@@ -122,6 +122,7 @@
 				</div>
 			  </div>
 			  <div class="chart-notes">
+				  Congestion score: 0 (no reported jams)
 			  </div>
 			</div>
 		</div> 
@@ -137,9 +138,11 @@
 				</div>
 			  </div>
 			  <div class="chart-notes">
+				  Congestion score: 0 (no reported jams)
 			  </div>
 			</div>
 		</div>
+		
 	</div>
 </div>
 
@@ -166,10 +169,7 @@
 	chart_dow_hour.fontSize = 12;
 	chart_dow_hour.responsive.enabled = true;
 	chart_dow_hour.exporting.menu = new am4core.ExportMenu();
-	var chartlabel_dow_hour = chart_dow_hour.chartContainer.createChild(am4core.Label);
-	chartlabel_dow_hour.text="Congestion score: 0 (no reported jams)";
-	chartlabel_dow_hour.align = "center";
-	chartlabel_dow_hour.fontsize= 16;
+
 	var charttitle_dow_hour = chart_dow_hour.titles.create();
 	charttitle_dow_hour.text = "Hwy 401 Express E_Toronto";
 	charttitle_dow_hour.fontSize = 16;
@@ -256,10 +256,7 @@
 	chart.maskBullets = false;
 	chart.responsive.enabled = true;
 	chart.exporting.menu = new am4core.ExportMenu();
-	var chartlabel = chart.chartContainer.createChild(am4core.Label);
-	chartlabel.text="Congestion score: 0 (no reported jams)";
-	chartlabel.align = "center";
-	chartlabel.fontsize= 10;
+
 	var charttitle = chart.titles.create();
 	charttitle.text = "Hwy 401 Express E_Toronto";
 	charttitle.fontSize = 16;
