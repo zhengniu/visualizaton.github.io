@@ -223,7 +223,7 @@
 	columnTemplate_dow_hour.hiddenState.properties.opacity = 0;
 
 	// heat rule, this makes columns to change color depending on value
-	series_dow_hour.heatRules.push({ target: columnTemplate_dow_hour, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109") });
+	series_dow_hour.heatRules.push({ target: columnTemplate_dow_hour, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109"), minValue:0,maxValue:100 });
 
 	// heat legend
 
@@ -295,7 +295,8 @@
 	  "property": "fill",
 	  "min": am4core.color("#e6e6e6"),
 	  "max": am4core.color("#e40109"),
-	  "dataField": "value"
+	  "minValue":0,
+	  "maxValue":100
 	});
 
 	var columnTemplate = series.columns.template;
