@@ -232,6 +232,8 @@
 	heatLegend_dow_hour.series = series_dow_hour;
 	heatLegend_dow_hour.valueAxis.renderer.labels.template.fontSize = 9;
 	heatLegend_dow_hour.valueAxis.renderer.minGridDistance = 30;
+	heatLegend_dow_hour.minValue = 0;
+	heatLegend_dow_hour.maxValue = 100;
 
 	// heat legend behavior
 	series_dow_hour.columns.template.events.on("over", function (event) {
