@@ -98,6 +98,8 @@
 	// heat legend
 	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend.width = am4core.percent(100);
+	heatLegend.minColor = am4core.color("#e6e6e6");
+	heatLegend.maxColor = am4core.color("#e40109");
 	heatLegend.series = series;
 	heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
 	heatLegend.valueAxis.renderer.minGridDistance = 30;
