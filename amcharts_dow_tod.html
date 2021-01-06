@@ -306,6 +306,8 @@
 	heatLegend.series = series;
 	heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
 	heatLegend.valueAxis.renderer.minGridDistance = 30;
+	heatLegend.maxValue = 100;
+	heatLegend.minValue = 0;
 
 	// heat legend behavior
 	series.columns.template.events.on("over", function(event) {
