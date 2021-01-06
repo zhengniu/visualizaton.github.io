@@ -229,6 +229,8 @@
 
 	var heatLegend_dow_hour = chart_dow_hour.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend_dow_hour.width = am4core.percent(100);
+	heatLegend_dow_hour.minColor = am4core.color("#e6e6e6");
+	heatLegend_dow_hour.maxColor = am4core.color("#e40109"); 
 	heatLegend_dow_hour.series = series_dow_hour;
 	heatLegend_dow_hour.valueAxis.renderer.labels.template.fontSize = 9;
 	heatLegend_dow_hour.valueAxis.renderer.minGridDistance = 30;
@@ -304,6 +306,8 @@
 	// heat legend
 	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend.width = am4core.percent(100);
+	heatLegend.minColor = am4core.color("#e6e6e6");
+	heatLegend.maxColor = am4core.color("#e40109");
 	heatLegend.series = series;
 	heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
 	heatLegend.valueAxis.renderer.minGridDistance = 30;
