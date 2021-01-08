@@ -163,9 +163,12 @@
 	function createEvent(date, text, color) {
 	  var flag = new am4plugins_bullets.FlagBullet();
 	  
-	  flag.label.text = text;
+
+          flag.label.text = text;
 	  flag.label.horizontalCenter = "middle";
 	  flag.label.fontSize = 12;
+          flag.label.fill="#F9F6F4";
+          flag.label.fontWeight="bold";
 	  
 	  flag.pole.stroke = color;
 	  flag.pole.strokeWidth = 2;
