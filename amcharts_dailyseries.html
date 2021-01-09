@@ -109,7 +109,7 @@
 	});
 
 	var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-
+	valueAxis.max =100;
 	// Create series
 	function createSeries(field, name) {
 	  var series = chart.series.push(new am4charts.LineSeries());
