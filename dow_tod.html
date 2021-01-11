@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+	
+    <meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="The Ontario Ministry of Transportation iCorridor service provides better understanding of historical, real-time, and forecast information in transportation and land use planning.As the public accessible website, iCorridor supports Ontario's Open Government initiative which makes government information more transparent to the general public. It includes project based land use planning boundaries and detailed demographic data, travel behaviour information (mode shares, highway traffic, and commercial vehicle characteristics), information on road and highway (travel speed and performance indices).">
+    <meta name="author" content="Systems Analysis and Forecasting Office, Ontario Ministry of Transportation">
+    <meta name="keywords" content="Congestion, Transportation, GPS, land use, Truck, Car, Survey, Commercial, Passenger, Forecast, Planning, Highway, Provincial, iCorridor, Corridor,GGH, Greater Golden Horseshoe, GO, Transit, AADT, AADTT, Traffic Volume, Delay, Travel Time, Collision, LHRS, Milepost, Greenbelt, GTHA, Transportation Planning, Transportation Forecasting">
+    <title>MTO iCorridor | Ontario.ca</title>
+	<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+	<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+	<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+	<script src="https://js.arcgis.com/4.17/"></script>
+    <style>
+		body {
+		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+		}
+
+		#chartdiv {
+		  width: 100%;
+		  height: 450px;
+		}
+	</style>
+
+  </head>
+
+  <body id="page-top">
+	<div id="chartdiv"></div>
+   
+  </body>
+<script>
+
+ require(["esri/layers/FeatureLayer"],function(FeatureLayer){
+	var dataLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_dow_hour_archived/FeatureServer/0",
+          outFields: ["*"],
+          visible: false
+        });
+	var query = dataLayer.createQuery();
+	query.where = "1=1";
+	query.orderByFields = ["DOW ASC, TOD ASC"];
+	// Apply chart themes
+	// Themes begin
+	am4core.useTheme(am4themes_animated);
+	// Themes end
+
+	var chart = am4core.create("chartdiv", am4charts.RadarChart);
+	chart.innerRadius = am4core.percent(30);
+	chart.fontSize = 11;
+	chart.responsive.enabled = true;
+	var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+	var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+	yAxis.renderer.minGridDistance = 5;
+
+	xAxis.renderer.labels.template.location = 0.5;
+	xAxis.renderer.labels.template.bent = true;
+	xAxis.renderer.labels.template.radius = 5;
+
+	xAxis.dataFields.category = "hour";
+	yAxis.dataFields.category = "weekday";
+
+	xAxis.renderer.grid.template.disabled = true;
+	xAxis.renderer.minGridDistance = 10;
+
+	yAxis.renderer.grid.template.disabled = true;
+	yAxis.renderer.inversed = true;
+
+	// this makes the y axis labels to be bent. By default y Axis labels are regular AxisLabels, so we replace them with AxisLabelCircular
+	// and call fixPosition for them to be bent
+	var yAxisLabel = new am4charts.AxisLabelCircular();
+	yAxisLabel.bent = true;
+	yAxisLabel.events.on("validated", function(event){  
+	  event.target.fixPosition(-90, am4core.math.getDistance({x:event.target.pixelX, y:event.target.pixelY}) - 5);
+	  event.target.dx = -event.target.pixelX;
+	  event.target.dy = -event.target.pixelY;
+	})
+	yAxis.renderer.labels.template = yAxisLabel;
+
+	var series = chart.series.push(new am4charts.RadarColumnSeries());
+	series.dataFields.categoryX = "hour";
+	series.dataFields.categoryY = "weekday";
+	series.dataFields.value = "value";
+	series.sequencedInterpolation = true;
+
+	var columnTemplate = series.columns.template;
+	columnTemplate.strokeWidth = 2;
+	columnTemplate.strokeOpacity = 1;
+	columnTemplate.stroke = am4core.color("#ffffff");
+	columnTemplate.tooltipText = "{weekday}, {hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate.width = am4core.percent(100);
+	columnTemplate.height = am4core.percent(100);
+
+	chart.seriesContainer.zIndex = -5;
+
+	columnTemplate.hiddenState.properties.opacity = 0;
+
+	// heat rule, this makes columns to change color depending on value
+	series.heatRules.push({ target: columnTemplate, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109") });
+
+	// heat legend
+
+	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
+	heatLegend.width = am4core.percent(100);
+	heatLegend.series = series;
+	heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
+	heatLegend.valueAxis.renderer.minGridDistance = 30;
+	heatLegend.maxValue = 100;
+	heatLegend.minValue = 0;
+	 
+	// heat legend behavior
+	series.columns.template.events.on("over", function (event) {
+	  handleHover(event.target);
+	})
+
+	series.columns.template.events.on("hit", function (event) {
+	  handleHover(event.target);
+	})
+
+	function handleHover(column) {
+	  if (!isNaN(column.dataItem.value)) {
+		heatLegend.valueAxis.showTooltipAt(column.dataItem.value)
+	  }
+	  else {
+		heatLegend.valueAxis.hideTooltip();
+	  }
+	}
+
+	series.columns.template.events.on("out", function (event) {
+	  heatLegend.valueAxis.hideTooltip();
+	})
+
+	dataLayer.queryFeatures(query).then(function(results){
+		let dataset=[];
+		
+		returnsets=results.features
+		for (i=0; i<returnsets.length; i++){
+			
+			a=returnsets[i];
+			switch (a.attributes.DOW) {
+			  case 1:
+				day = "Sunday";
+				break;
+			  case 2:
+				day = "Monday";
+				break;
+			  case 3:
+				day = "Tuesday";
+				break;
+			  case 4:
+				day = "Wednesday";
+				break;
+			  case 5:
+				day = "Thursday";
+				break;
+			  case 6:
+				day = "Friday";
+				break;
+			  case  7:
+				day = "Saturday";
+			}
+			function formatTimeShow(h_24) {
+				var h = h_24 % 12;
+				if (h === 0) h = 12;
+				return (h < 10 ? '' : '') + h + ' '+(h_24 < 12 ? 'am' : 'pm');
+			}			
+			dataset.push({
+				"weekday":day,
+				"hour":formatTimeShow(a.attributes.TOD),
+				"value":a.attributes.Congestion_Score
+			});
+			
+		}
+		
+		chart.data=dataset;
+	});
+
+ });
+</script>
+</html>
