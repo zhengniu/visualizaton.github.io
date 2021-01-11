@@ -54,7 +54,7 @@
         });
 	var query = dataLayer.createQuery();
 	query.where = "1=1";
-	query.orderByFields = ["week ASC, hour ASC"];
+	query.orderByFields = ["Week ASC, Hour ASC"];
 	// Apply chart themes
 	am4core.useTheme(am4themes_animated);
 
@@ -143,7 +143,7 @@
 		for (i=0; i<returnsets.length; i++){
 			a=returnsets[i];
 			for (f=0;f<timeseries_dataset.length;f++){
-				if (timeseries_dataset[f].week ==a.attributes.week && timeseries_dataset[f].hour==a.attributes.hour){
+				if (timeseries_dataset[f].week ==a.attributes.Week && timeseries_dataset[f].hour==a.attributes.Hour){
 						timeseries_dataset[f].value=a.attributes.Congestion_Score;
 				}
 			}
