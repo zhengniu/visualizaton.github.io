@@ -173,7 +173,7 @@
 	//chartlabel_dow_hour.align = "center";
 	//chartlabel_dow_hour.fontsize= 16;
 	var charttitle_dow_hour = chart_dow_hour.titles.create();
-	charttitle_dow_hour.text = "Hwy 401 Express E_CITY OF TORONTO";
+	charttitle_dow_hour.text = "Hwy 401 Express E_Toronto";
 	charttitle_dow_hour.fontSize = 16;
 	charttitle_dow_hour.marginBottom = 5;
 	var xAxis_dow_hour = chart_dow_hour.xAxes.push(new am4charts.CategoryAxis());
@@ -214,7 +214,7 @@
 	columnTemplate_dow_hour.strokeWidth = 2;
 	columnTemplate_dow_hour.strokeOpacity = 1;
 	columnTemplate_dow_hour.stroke = am4core.color("#ffffff");
-	columnTemplate_dow_hour.tooltipText = "on {weekday} @ {Hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate_dow_hour.tooltipText = "{corridor} on {weekday} @ {Hour}: {value.workingValue.formatNumber('#.')}";
 	columnTemplate_dow_hour.width = am4core.percent(100);
 	columnTemplate_dow_hour.height = am4core.percent(100);
 
@@ -224,18 +224,15 @@
 
 	// heat rule, this makes columns to change color depending on value
 	series_dow_hour.heatRules.push({ target: columnTemplate_dow_hour, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109") });
-        // minValue:0,maxValue:100
+
 	// heat legend
 
 	var heatLegend_dow_hour = chart_dow_hour.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend_dow_hour.width = am4core.percent(100);
-	heatLegend_dow_hour.minColor = am4core.color("#e6e6e6");
-	heatLegend_dow_hour.maxColor = am4core.color("#e40109"); 
 	heatLegend_dow_hour.series = series_dow_hour;
 	heatLegend_dow_hour.valueAxis.renderer.labels.template.fontSize = 9;
 	heatLegend_dow_hour.valueAxis.renderer.minGridDistance = 30;
-	//heatLegend_dow_hour.maxValue = 100;
-	//heatLegend_dow_hour.minValue = 0;
+
 	// heat legend behavior
 	series_dow_hour.columns.template.events.on("over", function (event) {
 	  handleHover_dow(event.target);
@@ -294,26 +291,21 @@
 	  "target": series.columns.template,
 	  "property": "fill",
 	  "min": am4core.color("#e6e6e6"),
-	  "max": am4core.color("#e40109")
-	  //"minValue":0,
-	  //"maxValue":100
+	  "max": am4core.color("#e40109"),
+	  "dataField": "value"
 	});
 
 	var columnTemplate = series.columns.template;
 	columnTemplate.strokeWidth = 2;
 	columnTemplate.strokeOpacity = 1;
 	columnTemplate.stroke = am4core.color("#ffffff");
-	columnTemplate.tooltipText = "Week:{week}, Hour: {hour}:, Score: {value.workingValue.formatNumber('#.')}";
+	columnTemplate.tooltipText = "{week}, {hour}: {value.workingValue.formatNumber('#.')}";
 	// heat legend
 	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend.width = am4core.percent(100);
-	heatLegend.minColor = am4core.color("#e6e6e6");
-	heatLegend.maxColor = am4core.color("#e40109");
 	heatLegend.series = series;
 	heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
 	heatLegend.valueAxis.renderer.minGridDistance = 30;
-	//heatLegend.maxValue = 100;
-	//heatLegend.minValue = 0;
 
 	// heat legend behavior
 	series.columns.template.events.on("over", function(event) {
