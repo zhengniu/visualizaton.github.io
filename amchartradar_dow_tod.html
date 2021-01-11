@@ -174,8 +174,7 @@
 					timeseries_dataset.push({
 					    "value":0,
 						"weekday":cday,
-						"Hour":k,
-						"corridor":unique_corridor[i]
+						"Hour":k
 					});
 				}
 			}
@@ -211,7 +210,7 @@
 				return (h < 10 ? '' : '') + h + ' '+(h_24 < 12 ? 'am' : 'pm');
 			}			
                 for (f=0;f<timeseries_dataset.length;f++){
-					if (timeseries_dataset[f].corridor ==a.attributes.Corridor && timeseries_dataset[f].weekday ==day && timeseries_dataset[f].Hour==a.attributes.Hour){
+					if (timeseries_dataset[f].weekday ==day && timeseries_dataset[f].Hour==a.attributes.Hour){
 						timeseries_dataset[f].value=a.attributes.Ad_Cong_Score;
 					}
 				}			
