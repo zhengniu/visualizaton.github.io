@@ -210,15 +210,17 @@
 				if (h === 0) h = 12;
 				return (h < 10 ? '' : '') + h + ' '+(h_24 < 12 ? 'am' : 'pm');
 			}			
-			dataset.push({
-				"weekday":day,
-				"hour":formatTimeShow(a.attributes.TOD),
-				"value":a.attributes.Congestion_Score
-			});
+                for (f=0;f<timeseries_dataset.length;f++){
+					if (timeseries_dataset[f].corridor ==a.attributes.Corridor && timeseries_dataset[f].weekday ==day && timeseries_dataset[f].Hour==a.attributes.Hour){
+						timeseries_dataset[f].value=a.attributes.Ad_Cong_Score;
+					}
+				}			
+				
+			}
 			
 		}
 		
-		chart.data=dataset;
+		chart.data=timeseries_dataset;
 	});
 
  });
