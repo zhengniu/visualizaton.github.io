@@ -136,16 +136,9 @@
 		let dataset=[];
 		
 		returnsets=results.features
-		let unique_corridor=[];
-		for (i=0; i<returnsets.length; i++){
-			a=returnsets[i];
-			if (!unique_corridor.includes(a.attributes.Corridor)) {
-			  unique_corridor.push(a.attributes.Corridor);
-			}
-		}
 
 		let timeseries_dataset=[];
-		for (i=0;i<unique_corridor.length; i++){
+
 			for (j=1; j<8; j++){
 				switch (j) {
 				  case 1:
@@ -178,7 +171,7 @@
 					});
 				}
 			}
-		}		
+				
 		for (i=0; i<returnsets.length; i++){
 			
 			a=returnsets[i];
