@@ -173,7 +173,7 @@
 	//chartlabel_dow_hour.align = "center";
 	//chartlabel_dow_hour.fontsize= 16;
 	var charttitle_dow_hour = chart_dow_hour.titles.create();
-	charttitle_dow_hour.text = "Hwy 401 Express E_Toronto";
+	charttitle_dow_hour.text = "Hwy 401 Express E_CITY OF TORONTO";
 	charttitle_dow_hour.fontSize = 16;
 	charttitle_dow_hour.marginBottom = 5;
 	var xAxis_dow_hour = chart_dow_hour.xAxes.push(new am4charts.CategoryAxis());
@@ -214,7 +214,7 @@
 	columnTemplate_dow_hour.strokeWidth = 2;
 	columnTemplate_dow_hour.strokeOpacity = 1;
 	columnTemplate_dow_hour.stroke = am4core.color("#ffffff");
-	columnTemplate_dow_hour.tooltipText = "{corridor} on {weekday} @ {Hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate_dow_hour.tooltipText = "on {weekday} @ {Hour}: {value.workingValue.formatNumber('#.')}";
 	columnTemplate_dow_hour.width = am4core.percent(100);
 	columnTemplate_dow_hour.height = am4core.percent(100);
 
@@ -299,7 +299,7 @@
 	columnTemplate.strokeWidth = 2;
 	columnTemplate.strokeOpacity = 1;
 	columnTemplate.stroke = am4core.color("#ffffff");
-	columnTemplate.tooltipText = "{week}, {hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate.tooltipText = "Week:{week}, Hour:{hour}: {value.workingValue.formatNumber('#.')}";
 	// heat legend
 	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend.width = am4core.percent(100);
