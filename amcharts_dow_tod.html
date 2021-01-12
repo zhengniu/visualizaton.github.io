@@ -214,7 +214,7 @@
 	columnTemplate_dow_hour.strokeWidth = 2;
 	columnTemplate_dow_hour.strokeOpacity = 1;
 	columnTemplate_dow_hour.stroke = am4core.color("#ffffff");
-	columnTemplate_dow_hour.tooltipText = "on {weekday} @ {Hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate_dow_hour.tooltipText = "on {weekday} @ {Hour}, Score: {value.workingValue.formatNumber('#.')}";
 	columnTemplate_dow_hour.width = am4core.percent(100);
 	columnTemplate_dow_hour.height = am4core.percent(100);
 
@@ -299,7 +299,7 @@
 	columnTemplate.strokeWidth = 2;
 	columnTemplate.strokeOpacity = 1;
 	columnTemplate.stroke = am4core.color("#ffffff");
-	columnTemplate.tooltipText = "Week:{week}, Hour:{hour}: {value.workingValue.formatNumber('#.')}";
+	columnTemplate.tooltipText = "Week:{week}, Hour:{hour}, Score: {value.workingValue.formatNumber('#.')}";
 	// heat legend
 	var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
 	heatLegend.width = am4core.percent(100);
