@@ -15,6 +15,7 @@
 	<script src="//www.amcharts.com/lib/4/themes/animated.js"></script>
 	<script src="//www.amcharts.com/lib/4/themes/kelly.js"></script>
 	<script src="//www.amcharts.com/lib/4/plugins/bullets.js"></script>
+	<script src="//cdn.amcharts.com/lib/4/plugins/overlapBuster.js"></script> 
 	<script src="https://js.arcgis.com/4.17/"></script>
     <style>
 	
@@ -25,7 +26,7 @@
 
 		#chartdiv {
 		  width: 100%;
-		  height: 250px;
+		  height: 300px;
 		}
 	</style>
 
@@ -83,7 +84,7 @@
 	// Enable export
 	chart.exporting.menu = new am4core.ExportMenu();
 	chart.dateFormatter.dateFormat = "yyyy-MM-dd";
-	
+
 	// Create axes
 	var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
 	//dateAxis.renderer.grid.template.location = 0;
@@ -142,58 +143,66 @@
 	  
 	  return series;
 	}
-
+	chart.colors.list = [
+		am4core.color("#000057"),
+		am4core.color("#A2DEEC"),
+	]
 	createSeries("value", "Province");
 	createSeries("value2", "GGH");
 	// Add scrollbar
 	chart.scrollbarX = new am4core.Scrollbar();
 	chart.scrollbarX.minHeight = 10;
-	chart.scrollbarX.startGrip.background.fill = am4core.color("#CBA5A4");
-	chart.scrollbarX.endGrip.background.fill = am4core.color("#CBA5A4");
-	chart.scrollbarX.thumb.background.fill = am4core.color("#CBA5A4");
+	chart.scrollbarX.startGrip.background.fill = am4core.color("#535353");
+	chart.scrollbarX.endGrip.background.fill = am4core.color("#535353");
+	chart.scrollbarX.thumb.background.fill = am4core.color("#535353");
 
-	chart.scrollbarX.startGrip.icon.stroke = am4core.color("#8A5658");
-	chart.scrollbarX.endGrip.icon.stroke = am4core.color("#8A5658");
+	chart.scrollbarX.startGrip.icon.stroke = am4core.color("#FFFFFF");
+	chart.scrollbarX.endGrip.icon.stroke = am4core.color("#FFFFFF");
 
 	chart.legend = new am4charts.Legend();
 	chart.cursor = new am4charts.XYCursor();
 	chart.cursor.maxTooltipDistance = 0; 
 	
-	// Create Event
+	// Create Event  createEvent 
 	function createEvent(date, text, color) {
 	  var flag = new am4plugins_bullets.FlagBullet();
 	  
 
           flag.label.text = text;
 	  flag.label.horizontalCenter = "middle";
-	  flag.label.fontSize = 12;
-          flag.label.fill="#F9F6F4";
-          flag.label.fontWeight="bold";
+	  flag.label.fontSize = 15;
+          flag.label.fill="#FFFFFF";
+          //flag.label.fontWeight="bold";
+		  flag.label.wrap = true;
+flag.label.maxWidth = 120;
 	  
-	  flag.pole.stroke = color;
+	  flag.pole.stroke = "#000000";
 	  flag.pole.strokeWidth = 2;
 	  
-	  flag.background.waveLength = 15;
-	  flag.background.fill = color;
-	  flag.background.stroke = color;
+	  flag.background.waveLength = 0;
+	  flag.background.fill = "#000000";
+	  flag.background.stroke = "#000000";
 	  flag.background.strokeWidth = 2;
 	  flag.background.fillOpacity = 0.6;
 	  
-	  flag.poleHeight = 40;
+	  flag.poleHeight = 70;
 	  var event = dateAxis.axisRanges.create();
 	  event.date = date;
 	  event.bullet = flag;
 	  event.grid.strokeWidth = 0;
+	  //enable overlap
+	  var overlap = chart.plugins.push(new am4plugins_overlapBuster.OverlapBuster());
+	  overlap.targets.push(flag);
 	  
 	}	
 	// javascript - Jan = 0; Dec =11
 	createEvent(new Date(2020, 5, 12, 12, 0, 0), "Stage 2 - reopening", am4core.color("#62E173"));
-	createEvent(new Date(2020, 6, 17,12, 0, 0), "Stage 3 - reopening", am4core.color("#10C228"));
-	createEvent(new Date(2020, 9, 19,12, 0, 0), "Modified Stage 2", am4core.color("#ECE618"));
-	createEvent(new Date(2020, 10, 23,12, 0, 0), "Lockdown-Peel, Toronto", am4core.color("#FD9704"));
+	createEvent(new Date(2020, 6, 31,12, 0, 0), "Toronto and Peel Region move into Stage3", am4core.color("#10C228"));
+	createEvent(new Date(2020, 9, 10,12, 0, 0), "Toronto, Peel Region and Ottawa move into Modified Stage 2", am4core.color("#ECE618"));
+	createEvent(new Date(2020, 10, 23,12, 0, 0), "Toronto and Peel region move into Lockdown", am4core.color("#FD9704"));
 	
-	createEvent(new Date(2020, 11, 26,12, 0, 0), "Strict Province-wide Lockdown", am4core.color("#F80400"));
-	createEvent(new Date(2021, 0, 14,12, 0, 0), "Stay-at-home Order", am4core.color("#950402"));
+	createEvent(new Date(2020, 11, 26,12, 0, 0), "Provincewide shutdown starts", am4core.color("#F80400"));
+	createEvent(new Date(2021, 0, 14,12, 0, 0), "Stay at home order for all of Ontario starts", am4core.color("#950402"));
 //var timeseries_set=[];
 	dataLayer.queryFeatures(query).then(function(results){
 		var returnsets=results.features;
