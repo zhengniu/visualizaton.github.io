@@ -56,7 +56,7 @@
         });
 	var query = dataLayer.createQuery();
 	query.where = "1=1";
-	query.orderByFields = ["Row_Labels ASC"];
+	query.orderByFields = ["Date_T ASC"];
 	var dataLayer_ggh = new FeatureLayer({
           url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_ggh_highway_daily_view/FeatureServer",
           outFields: ["*"],
