@@ -209,7 +209,7 @@ flag.label.maxWidth = 140;
 	createEvent(new Date(2021, 1, 16,12, 0, 0), "27 regions move into colour-coded reopening framework", am4core.color("#950402"));
 	 createEvent(new Date(2021, 1, 22,12, 0, 0), "York Region move into Control", am4core.color("#950402"));
 	 createEvent(new Date(2021, 2, 8,12, 0, 0), "Toronto, Peel move into Lockdown", am4core.color("#950402"));
-//var timeseries_set=[];
+	var timeseries_set=[];
 	dataLayer.queryFeatures(query).then(function(results){
 		var returnsets=results.features;
 		let timeseries_set=[];
