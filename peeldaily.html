@@ -57,14 +57,7 @@
 	var query = dataLayer.createQuery();
 	query.where = "1=1";
 	query.orderByFields = ["Date_T ASC"];
-	var dataLayer_ggh = new FeatureLayer({
-          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_ggh_highway_daily_view/FeatureServer",
-          outFields: ["*"],
-          visible: false
-        });
-	var query_ggh = dataLayer_ggh.createQuery();
-	query_ggh.where = "1=1";
-	query_ggh.orderByFields = ["Row_Labels ASC"];
+
 /**
  * ---------------------------------------
  * This demo was created using amCharts 4.
@@ -231,26 +224,8 @@ flag.label.maxWidth = 140;
 			
 		}
 		
-		//chart.data=timeseries_dataset;
-		//addresults(returnsets);
-		dataLayer_ggh.queryFeatures(query_ggh).then(function(results){
-			var returnsets=results.features;
+		chart.data=timeseries_dataset;
 
-			//addresults(returnsets);
-			for (i=0; i<returnsets.length; i++){
-				a=returnsets[i];
-				
-				for (j=0; j<timeseries_set.length;j++){
-					
-					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].value2==0){
-						
-						timeseries_set[j].value2=a.attributes.Congestion_Score;
-					}
-				}
-			}
-			
-			chart.data=timeseries_set;
-		});
 		
 		
 	});
