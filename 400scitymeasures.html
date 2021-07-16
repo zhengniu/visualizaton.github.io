@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+	
+    <meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="The Ontario Ministry of Transportation iCorridor service provides better understanding of historical, real-time, and forecast information in transportation and land use planning.As the public accessible website, iCorridor supports Ontario's Open Government initiative which makes government information more transparent to the general public. It includes project based land use planning boundaries and detailed demographic data, travel behaviour information (mode shares, highway traffic, and commercial vehicle characteristics), information on road and highway (travel speed and performance indices).">
+    <meta name="author" content="Systems Analysis and Forecasting Office, Ontario Ministry of Transportation">
+    <meta name="keywords" content="Congestion, Transportation, GPS, land use, Truck, Car, Survey, Commercial, Passenger, Forecast, Planning, Highway, Provincial, iCorridor, Corridor,GGH, Greater Golden Horseshoe, GO, Transit, AADT, AADTT, Traffic Volume, Delay, Travel Time, Collision, LHRS, Milepost, Greenbelt, GTHA, Transportation Planning, Transportation Forecasting">
+    <title>MTO iCorridor | Ontario.ca</title>
+	<script src="//www.amcharts.com/lib/4/core.js"></script>
+	<script src="//www.amcharts.com/lib/4/charts.js"></script>
+	<script src="//www.amcharts.com/lib/4/themes/animated.js"></script>
+	<script src="//www.amcharts.com/lib/4/themes/kelly.js"></script>
+	
+	<script src="https://js.arcgis.com/4.17/"></script>
+    <style>
+	
+		body {
+		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+		  font-size: 12pt;
+		}
+
+		#chartdiv {
+		  width: 100%;
+		  height: 900px;
+		}
+	</style>
+
+  </head>
+
+  <body id="page-top">
+	<div id="chartdiv"></div>
+   
+  </body>
+<script>
+/**
+ * ---------------------------------------
+ * This demo was created using amCharts 4.
+ *
+ * For more information visit:
+ * https://www.amcharts.com/
+ *
+ * Documentation is available at:
+ * https://www.amcharts.com/docs/v4/
+ * ---------------------------------------
+ */
+require(["esri/layers/FeatureLayer"],function(FeatureLayer){
+	var dataLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/ArcGIS/rest/services/Matrix_Performance_of_Highways_by_Years/FeatureServer",
+          outFields: ["*"],
+          visible: false
+        });
+	var query = dataLayer.createQuery();
+	query.where = "1=1";
+	<!-- query.orderByFields = ["Row_Labels ASC"]; -->
+
+/**
+ * ---------------------------------------
+ * This demo was created using amCharts 4.
+ *
+ * For more information visit:
+ * https://www.amcharts.com/
+ *
+ * Documentation is available at:
+ * https://www.amcharts.com/docs/v4/
+ * ---------------------------------------
+ */
+
+// Apply chart themes
+am4core.useTheme(am4themes_animated);
+
+var chart = am4core.create("chartdiv", am4charts.XYChart);
+chart.maskBullets = false;
+
+var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+
+xAxis.dataFields.category = "year";
+yAxis.dataFields.category = "hwy-city";
+
+xAxis.renderer.grid.template.disabled = true;
+xAxis.renderer.minGridDistance = 40;
+
+yAxis.renderer.grid.template.disabled = true;
+yAxis.renderer.inversed = true;
+yAxis.renderer.minGridDistance = 30;
+
+var series = chart.series.push(new am4charts.ColumnSeries());
+series.dataFields.categoryX = "year";
+series.dataFields.categoryY = "hwy-city";
+series.dataFields.value = "value";
+series.sequencedInterpolation = true;
+series.defaultState.transitionDuration = 3000;
+series.columns.template.width = am4core.percent(100);
+series.columns.template.height = am4core.percent(100);
+
+
+var columnTemplate = series.columns.template;
+columnTemplate.strokeWidth = 2;
+columnTemplate.strokeOpacity = 1;
+columnTemplate.stroke = am4core.color("#ffffff");
+columnTemplate.tooltipText = "{year}, {hwy-city}: {value.workingValue.formatNumber('#.')}";
+
+columnTemplate.column.adapter.add("fill", function(fill, target) {
+  if (target.dataItem) {
+    if (target.dataItem.value >= 90) {
+      return am4core.color("#0f0")
+    }
+    else if (target.dataItem.value >= 75 && target.dataItem.value<90) {
+      return am4core.color("#ff0")
+    }
+    else {
+      return am4core.color("#f00");
+    }
+  }
+  return fill;
+});
+
+var legend = new am4charts.Legend();
+legend.parent = chart.chartContainer;
+legend.data = [{
+  "name": ">= 90km/hr",
+  "fill": am4core.color("#0f0")
+}, {
+  "name": ">=75km/hr",
+  "fill": am4core.color("#ff0")
+}, {
+  "name": "<75km/hr",
+  "fill": am4core.color("#f00")
+}];
+
+
+//var timeseries_set=[];
+	dataLayer.queryFeatures(query).then(function(results){
+		var returnsets=results.features;
+		let timeseries_set=[];
+		<!-- console.log(returnsets) -->
+		for (i=0; i<returnsets.length; i++){
+			a=returnsets[i];
+			//console.log(Object.keys(a.attributes));
+			keys=Object.keys(a.attributes)
+			for (j=0;j<keys.length; j++){
+				if (keys[j].slice(0,1)=='F'){
+					keyfield=keys[j];
+					key_year=keyfield.slice(1, 5);
+					console.log('CD ',a.attributes.HWY_CDNAME, ' Year ',key_year, ' Value ', a.attributes[keyfield])
+					timeseries_set.push({
+						"hwy-city":a.attributes.HWY_CDNAME,
+						"year":key_year,
+						"value":a.attributes[keyfield]
+					});
+				}
+			}
+			//timeseries_set.push({
+				//"hwy-city":a.attributes.HWY_CDNAME,
+				//"year":a.attributes.Congestion_Score,
+				//"value":a.attributes
+			//});
+			
+		}
+		
+		chart.data=timeseries_set;
+		//addresults(returnsets);	
+		
+	});
+
+	
+
+
+ });
+</script>
+</html>
