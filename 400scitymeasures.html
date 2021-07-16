@@ -20,12 +20,12 @@
 	
 		body {
 		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-		  font-size: 12pt;
+		  font-size: 10pt;
 		}
 
 		#chartdiv {
 		  width: 100%;
-		  height: 900px;
+		  height: 100%;
 		}
 	</style>
 
@@ -83,10 +83,11 @@ yAxis.dataFields.category = "hwy-city";
 
 xAxis.renderer.grid.template.disabled = true;
 xAxis.renderer.minGridDistance = 40;
-
+xAxis.renderer.opposite = true;
 yAxis.renderer.grid.template.disabled = true;
 yAxis.renderer.inversed = true;
 yAxis.renderer.minGridDistance = 30;
+
 
 var series = chart.series.push(new am4charts.ColumnSeries());
 series.dataFields.categoryX = "year";
@@ -134,40 +135,56 @@ legend.data = [{
 
 
 //var timeseries_set=[];
-	dataLayer.queryFeatures(query).then(function(results){
-		var returnsets=results.features;
-		let timeseries_set=[];
-		<!-- console.log(returnsets) -->
-		for (i=0; i<returnsets.length; i++){
-			a=returnsets[i];
-			//console.log(Object.keys(a.attributes));
-			keys=Object.keys(a.attributes)
-			for (j=0;j<keys.length; j++){
-				if (keys[j].slice(0,1)=='F'){
-					keyfield=keys[j];
-					key_year=keyfield.slice(1, 5);
-					console.log('CD ',a.attributes.HWY_CDNAME, ' Year ',key_year, ' Value ', a.attributes[keyfield])
-					timeseries_set.push({
-						"hwy-city":a.attributes.HWY_CDNAME,
-						"year":key_year,
-						"value":a.attributes[keyfield]
-					});
-				}
+dataLayer.queryFeatures(query).then(function(results){
+	var returnsets=results.features;
+	let timeseries_set=[];
+	<!-- console.log(returnsets) -->
+	for (i=0; i<returnsets.length; i++){
+		a=returnsets[i];
+		//console.log(Object.keys(a.attributes));
+		keys=Object.keys(a.attributes)
+		for (j=0;j<keys.length; j++){
+			if (keys[j].slice(0,1)=='F'){
+				keyfield=keys[j];
+				key_year=keyfield.slice(1, 5);
+				
+				timeseries_set.push({
+					"hwy-city":a.attributes.HWY_CDNAME,
+					"year":key_year,
+					"value":a.attributes[keyfield]
+				});
 			}
-			//timeseries_set.push({
-				//"hwy-city":a.attributes.HWY_CDNAME,
-				//"year":a.attributes.Congestion_Score,
-				//"value":a.attributes
-			//});
-			
 		}
+		//timeseries_set.push({
+			//"hwy-city":a.attributes.HWY_CDNAME,
+			//"year":a.attributes.Congestion_Score,
+			//"value":a.attributes
+		//});
 		
-		chart.data=timeseries_set;
-		//addresults(returnsets);	
-		
-	});
-
+	}
 	
+	chart.data=timeseries_set;
+	//addresults(returnsets);	
+	
+});
+
+// Set cell size in pixels
+var cellSize = 3;
+chart.events.on("datavalidated", function(ev) {
+  
+  // Get objects of interest
+  var chart = ev.target;
+  var categoryAxis = chart.yAxes.getIndex(0);
+  
+  // Calculate how we need to adjust chart height
+  var adjustHeight = chart.data.length * cellSize - categoryAxis.pixelHeight;
+
+  // get current chart height
+  var targetHeight = chart.pixelHeight + adjustHeight;
+
+  // Set it on chart's container
+  chart.svgContainer.htmlElement.style.height = targetHeight + "px";
+});	
 
 
  });
