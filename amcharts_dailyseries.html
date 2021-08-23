@@ -107,7 +107,15 @@
         });
 	var query_niagara = dataLayer_niagara.createQuery();
 	query_niagara.where = "1=1";
-	query_niagara.orderByFields = ["Row_Labels ASC"];		
+	query_niagara.orderByFields = ["Row_Labels ASC"];	
+	var dataLayer_toronto = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_toronto_highway_daily/FeatureServer",
+          outFields: ["*"],
+          visible: false
+        });
+	var query_toronto = dataLayer_toronto.createQuery();
+	query_toronto.where = "1=1";
+	query_toronto.orderByFields = ["Row_Labels ASC"];	
 /**
  * ---------------------------------------
  * This demo was created using amCharts 4.
@@ -192,6 +200,7 @@
 	  return series;
 	}
 	chart.colors.list = [
+		am4core.color("#000000"),
 		am4core.color("#002233"),
 		am4core.color("#004466"),
 		am4core.color("#006699"),
@@ -202,6 +211,7 @@
 		
 	]
 	createSeries("prov", "Province");
+	createSeries("toronto", "Toronto");
 	createSeries("ggh", "GGH");
 	createSeries("york", "York");
 	createSeries("peel", "Peel");
@@ -291,6 +301,7 @@ flag.label.maxWidth = 140;
 				"halton":0,
 				"durham":0,
 				"niagara":0,
+				"toronto":0,
 			});
 			
 		}
@@ -383,6 +394,8 @@ flag.label.maxWidth = 140;
 			}
 			
 			chart.data=timeseries_set;
+		
+		});	
 		dataLayer_niagara.queryFeatures(query_niagara).then(function(results){
 			var returnsets=results.features;
 
@@ -399,7 +412,23 @@ flag.label.maxWidth = 140;
 			}
 			
 			chart.data=timeseries_set;
-		});			
+		});	
+		dataLayer_toronto.queryFeatures(query_toronto).then(function(results){
+			var returnsets=results.features;
+
+			//addresults(returnsets);
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				
+				for (j=0; j<timeseries_set.length;j++){
+					
+					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].toronto==0){
+						timeseries_set[j].toronto=a.attributes.Congestion_Score;
+					}
+				}
+			}
+			
+			chart.data=timeseries_set;
 		});			
 	});
 
