@@ -74,6 +74,40 @@
 	var query_york = dataLayer_york.createQuery();
 	query_york.where = "1=1";
 	query_york.orderByFields = ["Row_Labels ASC"];	
+
+	var dataLayer_peel = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_peel_highway_daily/FeatureServer",
+          outFields: ["*"],
+          visible: false
+        });
+	var query_peel = dataLayer_peel.createQuery();
+	query_peel.where = "1=1";
+	query_peel.orderByFields = ["Row_Labels ASC"];	
+	
+	var dataLayer_halton = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_halton_highway_daily/FeatureServer",
+          outFields: ["*"],
+          visible: false
+        });
+	var query_halton = dataLayer_halton.createQuery();
+	query_halton.where = "1=1";
+	query_halton.orderByFields = ["Row_Labels ASC"];	
+	var dataLayer_durham = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_durham_highway_daily/FeatureServer",
+          outFields: ["*"],
+          visible: false
+        });
+	var query_durham = dataLayer_durham.createQuery();
+	query_durham.where = "1=1";
+	query_durham.orderByFields = ["Row_Labels ASC"];	
+	var dataLayer_niagara = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_niagara_highway_daily/FeatureServer",
+          outFields: ["*"],
+          visible: false
+        });
+	var query_niagara = dataLayer_niagara.createQuery();
+	query_niagara.where = "1=1";
+	query_niagara.orderByFields = ["Row_Labels ASC"];		
 /**
  * ---------------------------------------
  * This demo was created using amCharts 4.
@@ -167,9 +201,13 @@
 		am4core.color("#e6f7ff"),
 		
 	]
-	createSeries("value", "Province");
-	createSeries("value2", "GGH");
-	createSeries("value3", "York");
+	createSeries("prov", "Province");
+	createSeries("ggh", "GGH");
+	createSeries("york", "York");
+	createSeries("peel", "Peel");
+	createSeries("halton", "Halton");
+	createSeries("durham", "Durham");
+	createSeries("niagara", "Niagara");
 	// Add scrollbar
 	chart.scrollbarX = new am4core.Scrollbar();
 	chart.scrollbarX.minHeight = 10;
@@ -246,9 +284,13 @@ flag.label.maxWidth = 140;
 			
 			timeseries_set.push({
 				"date":a.attributes.Row_Labels,
-				"value":a.attributes.Congestion_Score,
-				"value2":0,
-				"value3":0,
+				"prov":a.attributes.Congestion_Score,
+				"ggh":0,
+				"york":0,
+				"peel":0,
+				"halton":0,
+				"durham":0,
+				"niagara":0,
 			});
 			
 		}
@@ -264,9 +306,9 @@ flag.label.maxWidth = 140;
 				
 				for (j=0; j<timeseries_set.length;j++){
 					
-					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].value2==0){
+					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].ggh==0){
 						
-						timeseries_set[j].value2=a.attributes.Congestion_Score;
+						timeseries_set[j].ggh=a.attributes.Congestion_Score;
 					}
 				}
 			}
@@ -283,15 +325,82 @@ flag.label.maxWidth = 140;
 				
 				for (j=0; j<timeseries_set.length;j++){
 					
-					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].value3==0){
-						timeseries_set[j].value3=a.attributes.Congestion_Score;
+					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].york==0){
+						timeseries_set[j].york=a.attributes.Congestion_Score;
 					}
 				}
 			}
 			
 			chart.data=timeseries_set;
 		});		
-		
+		dataLayer_peel.queryFeatures(query_peel).then(function(results){
+			var returnsets=results.features;
+
+			//addresults(returnsets);
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				
+				for (j=0; j<timeseries_set.length;j++){
+					
+					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].peel==0){
+						timeseries_set[j].peel=a.attributes.Congestion_Score;
+					}
+				}
+			}
+			
+			chart.data=timeseries_set;
+		});	
+		dataLayer_halton.queryFeatures(query_halton).then(function(results){
+			var returnsets=results.features;
+
+			//addresults(returnsets);
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				
+				for (j=0; j<timeseries_set.length;j++){
+					
+					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].halton==0){
+						timeseries_set[j].halton=a.attributes.Congestion_Score;
+					}
+				}
+			}
+			
+			chart.data=timeseries_set;
+		});		
+		dataLayer_durham.queryFeatures(query_durham).then(function(results){
+			var returnsets=results.features;
+
+			//addresults(returnsets);
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				
+				for (j=0; j<timeseries_set.length;j++){
+					
+					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].durham==0){
+						timeseries_set[j].durham=a.attributes.Congestion_Score;
+					}
+				}
+			}
+			
+			chart.data=timeseries_set;
+		dataLayer_niagara.queryFeatures(query_niagara).then(function(results){
+			var returnsets=results.features;
+
+			//addresults(returnsets);
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				
+				for (j=0; j<timeseries_set.length;j++){
+					
+					if (a.attributes.Row_Labels == timeseries_set[j].date && timeseries_set[j].niagara==0){
+						timeseries_set[j].niagara=a.attributes.Congestion_Score;
+					}
+				}
+			}
+			
+			chart.data=timeseries_set;
+		});			
+		});			
 	});
 
 	
