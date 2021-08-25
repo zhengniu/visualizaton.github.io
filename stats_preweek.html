@@ -121,13 +121,8 @@
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_score,
-			title: "Congestion Score",
-			font: {
-				family: 'Courier New, monospace',
-				size: 12,
-				color: '#0d0d0d'
-			},			
-			number: {prefix: " ", valueformat:".2f"},
+			title: "Congestion Score",			
+			number: {prefix: " ", valueformat:".2f",  font: { size: 20 }},
 			domain: { x: [0, 0.2], y: [0, 1] },
 			delta: { reference: base_score,valueformat: ".1f", relative: false}
 		  },
@@ -136,12 +131,7 @@
 			mode: "number+delta",
 			value: ref_spd,
 			title:"Average Speed",
-			font: {
-				family: 'Courier New, monospace',
-				size: 12,
-				color: '#0d0d0d'
-			},
-			number: {prefix: " ", valueformat:".2f"},
+			number: {prefix: " ", valueformat:".2f",  font: { size: 20 }},
 			delta: { reference: base_spd, valueformat: ".1f",relative: false},
 			domain: { x: [0.2, 0.4], y: [0, 1] }
 		  },
