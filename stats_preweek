@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+	
+    <meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="The Ontario Ministry of Transportation iCorridor service provides better understanding of historical, real-time, and forecast information in transportation and land use planning.As the public accessible website, iCorridor supports Ontario's Open Government initiative which makes government information more transparent to the general public. It includes project based land use planning boundaries and detailed demographic data, travel behaviour information (mode shares, highway traffic, and commercial vehicle characteristics), information on road and highway (travel speed and performance indices).">
+    <meta name="author" content="Systems Analysis and Forecasting Office, Ontario Ministry of Transportation">
+    <meta name="keywords" content="Congestion, Transportation, GPS, land use, Truck, Car, Survey, Commercial, Passenger, Forecast, Planning, Highway, Provincial, iCorridor, Corridor,GGH, Greater Golden Horseshoe, GO, Transit, AADT, AADTT, Traffic Volume, Delay, Travel Time, Collision, LHRS, Milepost, Greenbelt, GTHA, Transportation Planning, Transportation Forecasting">
+    <title>MTO iCorridor | Ontario.ca</title>
+	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+	<script src="https://js.arcgis.com/4.17/"></script>
+    <style>
+	
+		body {
+		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+		  font-size: 12pt;
+		}
+
+		#myDiv {
+		  width: 100%;
+		  height: 100%;
+		}
+	</style>
+
+  </head>
+
+  <body id="page-top">
+	<div id="myDiv"></div>
+   
+  </body>
+<script>
+/**
+ * ---------------------------------------
+ * This demo was created using amCharts 4.
+ *
+ * For more information visit:
+ * https://www.amcharts.com/
+ *
+ * Documentation is available at:
+ * https://www.amcharts.com/docs/v4/
+ * ---------------------------------------
+ */
+ require(["esri/layers/FeatureLayer","dojo/date/locale"],function(FeatureLayer,locale){
+	var dataLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_province_weekly_view/FeatureServer",
+          outFields: ["*"],
+          visible: false
+        });
+	var query = dataLayer.createQuery();
+	query.where = "1=1";
+	query.orderByFields = ["Week DESC"];
+	var timeseries_set=[];
+
+	var recent_cong= dataLayer.queryFeatures(query).then(function(results){
+		var returnsets=results.features;
+		<!-- console.log(returnsets); -->
+		
+		ref_week=returnsets[1].attributes.Week;
+		console.log('previous week ', ref_week);
+		let timeseries_set=[];
+		for (i=0; i<returnsets.length; i++){
+			a=returnsets[i];
+			if (a.attributes.Week == ref_week || a.attributes.Week==ref_week-100 ){
+				timeseries_set.push({
+					"week":a.attributes.Week,
+					"score":a.attributes.Congestion_Score,
+					"spd":a.attributes.Avg_Speed,
+					"cnt":a.attributes.Sum_Count,
+					"len":a.attributes.Sum_Length,
+					"delay":a.attributes.Sum_Delay,
+					"dur":a.attributes.Sum_Duration
+				});
+			}
+			
+		}
+	
+		return 	timeseries_set;
+	});
+	
+	recent_cong.then(function(results){
+		console.log(results);
+		// Some info about viewport percentages:
+		// http://stackoverflow.com/questions/1575141/make-div-100-height-of-browser-window
+		let ref_week= results[0].week;
+		let ref_score=results[0].score;
+		let ref_spd=results[0].spd;
+		let ref_cnt=results[0].cnt;
+		let ref_len=results[0].len;
+		let ref_dur=results[0].dur;
+		
+		let base_week= results[1].week;
+		let base_score=results[1].score;
+		let base_spd=results[1].spd;
+		let base_cnt=results[1].cnt;
+		let base_len=results[1].len;
+		let base_dur=results[1].dur;		
+
+		var d3 = Plotly.d3;
+
+		var gd3 = d3.select('#myDiv')
+			.append('div')
+			.style({
+				width: '100%',
+				<!-- WIDTH_IN_PERCENT_OF_PARENT + '%','margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%', -->
+
+				height: '100'
+				<!-- HEIGHT_IN_PERCENT_OF_PARENT + 'vh','margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh' -->
+			});
+
+		var gd = gd3.node();
+
+
+		window.onresize = function() {
+			Plotly.Plots.resize(gd);
+		};
+		var data = [
+		  {
+			type: "indicator",
+			mode: "number+delta",
+			value: ref_score,
+			title: "Congestion Score",
+			font: {
+				family: 'Courier New, monospace',
+				size: 12,
+				color: '#0d0d0d'
+			},			
+			number: {prefix: " ", valueformat:".2f"},
+			domain: { x: [0, 0.2], y: [0, 1] },
+			delta: { reference: base_score,valueformat: ".1f", relative: false}
+		  },
+		  {
+			type: "indicator",
+			mode: "number+delta",
+			value: ref_spd,
+			title:"Average Speed",
+			font: {
+				family: 'Courier New, monospace',
+				size: 12,
+				color: '#0d0d0d'
+			},
+			number: {prefix: " ", valueformat:".2f"},
+			delta: { reference: base_spd, valueformat: ".1f",relative: false},
+			domain: { x: [0.2, 0.4], y: [0, 1] }
+		  },
+		  {
+			type: "indicator",
+			mode: "number+delta",
+			value: ref_len,
+			title:"Length",
+			font: {
+				family: 'Courier New, monospace',
+				size: 12,
+				color: '#0d0d0d'
+			},			
+			number: {prefix: " ", valueformat:",.0f"},
+			delta: { reference: base_len, valueformat: ",.0f",relative: false },
+			domain: { x: [0.4, 0.6], y: [0, 1] }
+		  },
+			{
+			type: "indicator",
+			mode: "number+delta",
+			value: ref_cnt,
+			title:"Count",
+			font: {
+				family: 'Courier New, monospace',
+				size: 12,
+				color: '#0d0d0d'
+			},			
+			number: {prefix: " ", valueformat:",.0f"},
+			delta: { reference: base_cnt, valueformat: ",.0f",relative: false },
+			domain: { x: [0.6, 0.8], y: [0,1] }
+		  },
+		  {
+			type: "indicator",
+			mode: "number+delta",
+			value: ref_dur,
+			title:"Duration",
+			font: {
+				family: 'Courier New, monospace',
+				size: 12,
+				color: '#0d0d0d'
+			},			
+			number: {prefix: " ", valueformat:",.0f"},
+			delta: { reference: base_dur, valueformat: ",.0f",relative: false },
+			domain: { x: [0.8, 1], y: [0,1] }
+		  }
+		];
+		
+
+
+		var layout = {
+			paper_bgcolor: "lightgray",
+			height: 400,
+			font: {
+				
+				size: 12,
+				color: '#0d0d0d'
+			},			
+			margin: { t: 0, b: 0, l: 0, r: 0 }
+		};
+
+		Plotly.newPlot(gd, data,layout);		
+	});
+	
+
+	
+
+//var timeseries_set=[];
+
+
+	
+
+
+ });
+</script>
+</html>
