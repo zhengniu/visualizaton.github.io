@@ -122,7 +122,7 @@
 			mode: "number+delta",
 			value: ref_score,
 			title: "Congestion Score",			
-			number: {prefix: " ", valueformat:".2f",  font: { size: 20 }},
+			number: {prefix: " ", valueformat:".2f",  font: { size: 12 }},
 			domain: { x: [0, 0.2], y: [0, 1] },
 			delta: { reference: base_score,valueformat: ".1f", relative: false}
 		  },
@@ -131,7 +131,7 @@
 			mode: "number+delta",
 			value: ref_spd,
 			title:"Average Speed",
-			number: {prefix: " ", valueformat:".2f",  font: { size: 20 }},
+			number: {prefix: " ", valueformat:".2f",  font: { size: 12 }},
 			delta: { reference: base_spd, valueformat: ".1f",relative: false},
 			domain: { x: [0.2, 0.4], y: [0, 1] }
 		  },
@@ -139,13 +139,8 @@
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_len,
-			title:"Length",
-			font: {
-				family: 'Courier New, monospace',
-				size: 12,
-				color: '#0d0d0d'
-			},			
-			number: {prefix: " ", valueformat:",.0f"},
+			title:"Length",		
+			number: {prefix: " ", valueformat:",.0f",  font: { size: 12 }},
 			delta: { reference: base_len, valueformat: ",.0f",relative: false },
 			domain: { x: [0.4, 0.6], y: [0, 1] }
 		  },
@@ -154,12 +149,8 @@
 			mode: "number+delta",
 			value: ref_cnt,
 			title:"Count",
-			font: {
-				family: 'Courier New, monospace',
-				size: 12,
-				color: '#0d0d0d'
-			},			
-			number: {prefix: " ", valueformat:",.0f"},
+			
+			number: {prefix: " ", valueformat:",.0f",font: { size: 12 }},
 			delta: { reference: base_cnt, valueformat: ",.0f",relative: false },
 			domain: { x: [0.6, 0.8], y: [0,1] }
 		  },
@@ -168,12 +159,8 @@
 			mode: "number+delta",
 			value: ref_dur,
 			title:"Duration",
-			font: {
-				family: 'Courier New, monospace',
-				size: 12,
-				color: '#0d0d0d'
-			},			
-			number: {prefix: " ", valueformat:",.0f"},
+			
+			number: {prefix: " ", valueformat:",.0f",font: { size: 12 }},
 			delta: { reference: base_dur, valueformat: ",.0f",relative: false },
 			domain: { x: [0.8, 1], y: [0,1] }
 		  }
