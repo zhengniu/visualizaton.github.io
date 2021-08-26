@@ -16,12 +16,12 @@
 	
 		body {
 		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-		  font-size: 18pt;
+		  font-size: 10pt;
 		}
 
 		#myDiv {
 		  width: 100%;
-		  height: 400;
+		  height: 100%;
 		}
 	</style>
 
@@ -90,6 +90,7 @@
 		let ref_cnt=results[0].cnt;
 		let ref_len=results[0].len;
 		let ref_dur=results[0].dur;
+		let ref_del=results[0].delay;
 		
 		let base_week= results[1].week;
 		let base_score=results[1].score;
@@ -97,7 +98,7 @@
 		let base_cnt=results[1].cnt;
 		let base_len=results[1].len;
 		let base_dur=results[1].dur;		
-
+		let base_del=results[1].delay;
 		var d3 = Plotly.d3;
 
 		var gd3 = d3.select('#myDiv')
@@ -106,8 +107,9 @@
 				width: '100%',
 				<!-- WIDTH_IN_PERCENT_OF_PARENT + '%','margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%', -->
 
-				height: '100%'
+				height:'100%',
 				<!-- HEIGHT_IN_PERCENT_OF_PARENT + 'vh','margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh' -->
+				margin: { t: 100, r: 0, l: 0, b: 0 }
 			});
 
 		var gd = gd3.node();
@@ -121,9 +123,9 @@
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_score,
-			title: "Congestion Score",			
-			number: {prefix: " ", valueformat:".2f",  font: { size: 18 }},
-			domain: { x: [0, 0.2], y: [0, 1] },
+			title: {text:"Congestion Score<br><span style='font-size:0.8em;color:gray'>week 34, 2021</span>"},			
+			number: {prefix: " ", valueformat:".2f", font:{size:50}},
+			domain: {x: [0.1, 0.3], y: [0, 0.5]},
 			delta: { reference: base_score,valueformat: ".1f", relative: false}
 		  },
 		  {
@@ -131,18 +133,18 @@
 			mode: "number+delta",
 			value: ref_spd,
 			title:"Average Speed",
-			number: {prefix: " ", valueformat:".2f",  font: { size: 18 }},
+			number: {prefix: " ", valueformat:".2f", font:{size:50}},
 			delta: { reference: base_spd, valueformat: ".1f",relative: false},
-			domain: { x: [0.2, 0.4], y: [0, 1] }
+			domain: { x: [0.1, 0.3], y: [0.5, 0.9] }
 		  },
 		  {
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_len,
 			title:"Length",		
-			number: {prefix: " ", valueformat:",.0f",  font: { size: 18 }},
+			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
 			delta: { reference: base_len, valueformat: ",.0f",relative: false },
-			domain: { x: [0.4, 0.6], y: [0, 1] }
+			domain: { x: [0.3, 0.6], y: [0, 0.5] }
 		  },
 			{
 			type: "indicator",
@@ -150,33 +152,47 @@
 			value: ref_cnt,
 			title:"Count",
 			
-			number: {prefix: " ", valueformat:",.0f",font: { size: 18 }},
+			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
 			delta: { reference: base_cnt, valueformat: ",.0f",relative: false },
-			domain: { x: [0.6, 0.8], y: [0,1] }
+			domain: { x: [0.3, 0.6], y: [0.5, 0.9]  }
 		  },
 		  {
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_dur,
 			title:"Duration",
-			
-			number: {prefix: " ", valueformat:",.0f",font: { size: 18 }},
+			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
 			delta: { reference: base_dur, valueformat: ",.0f",relative: false },
-			domain: { x: [0.8, 1], y: [0,1] }
+			domain: {  x: [0.6, 0.9], y: [0, 0.5] }
+		  },
+		  {
+			type: "indicator",
+			mode: "number+delta",
+			value: ref_del,
+			title:"Delay",
+			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
+			delta: { reference: base_del, valueformat: ",.0f",relative: false },
+			domain: {  x: [0.6, 0.9], y: [0.5, 0.9] }
+		  },
+		  {
+			type: "indicator",
+			mode: "number",
+			title:{text:"week 34, 2021 compared to week 34, 2020"},			
+			domain: {  x: [0, 1], y: [0.9, 1] }
 		  }
 		];
 		
 
 
 		var layout = {
+	
 			paper_bgcolor: "lightgray",
-			height: 400,
+			height: 300,
+			grid: { rows: 2, columns: 6, pattern: "independent"},
 			font: {
-				
-				size: 18,
-				color: '#0d0d0d'
+				color: '#ff0000'
 			},			
-			margin: { t: 0, b: 0, l: 0, r: 0 }
+			margin: { t: 0, r: 0, l: 0, b: 0 }
 		};
 
 		Plotly.newPlot(gd, data,layout);		
