@@ -101,6 +101,24 @@
 		let base_del=results[1].delay;
 		var d3 = Plotly.d3;
 
+		<!-- const weekNumber = "53 2020"; -->
+		<!-- const weekYearArr = weekNumber.split(" ").map(n => parseInt(n)) -->
+		
+		let ref_weekYearArr=[parseInt(String(ref_week).slice(-2)), parseInt(String(ref_week).slice(0,4))];
+		
+		let ref_weekOut = getISOWeek(...ref_weekYearArr); 
+		let ref_to_date=new Date(ref_weekOut[0]);
+		let ref_yes_date=new Date(ref_to_date);
+		ref_yes_date.setDate(ref_yes_date.getDate() - 1);
+		let dis_ref_date=ref_yes_date.toLocaleDateString();
+		
+		let base_weekYearArr=[parseInt(String(base_week).slice(-2)), parseInt(String(base_week).slice(0,4))];
+		let base_weekOut = getISOWeek(...base_weekYearArr); 
+		let base_to_date=new Date(base_weekOut[0]);
+		let base_yes_date=new Date(base_to_date);
+		base_yes_date.setDate(base_yes_date.getDate() - 1);
+		let dis_base_date=base_yes_date.toLocaleDateString();	
+		
 		var gd3 = d3.select('#myDiv')
 			.append('div')
 			.style({
@@ -179,8 +197,10 @@
 
 
 		var layout = {
+			
+			
 			height: 300,
-			title: {text:"Week "+String(ref_week).slice(-2) + ','+String(ref_week).slice(0,4)+' difference from ' + 'Week ' +String(base_week).slice(-2) +','+String(base_week).slice(0,4)},	
+			title: {text:"Week "+String(ref_week).slice(-2) + ','+String(ref_week).slice(0,4)+'('+dis_ref_date+')' +' difference from ' + 'Week ' +String(base_week).slice(-2) +','+String(base_week).slice(0,4)+"("+dis_base_date+")"},	
 						
 			margin: { t: 80, r: 0, l: 0, b: 0 }
 		};
@@ -188,6 +208,37 @@
 		Plotly.newPlot(gd, data,layout);		
 	});
 	
+	function getISOWeek(w, y) {
+		var simple =  new Date(Date.UTC(y, 0, 1 + (w - 1) * 7));
+		var dow = simple.getDay();
+		var ISOweekStart = simple;
+		if (dow <= 4)
+			ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+		else
+			ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+		const temp = {
+		  d: ISOweekStart.getDate(),
+		  m: ISOweekStart.getMonth(),
+		  y: ISOweekStart.getFullYear(),
+		}
+		//console.log(ISOweekStart)
+		const numDaysInMonth = new Date(temp.y, temp.m + 1, 0).getDate()
+		
+		return Array.from({length: 7}, _ => {
+		  if (temp.d > numDaysInMonth){
+			temp.m +=1;
+			temp.d = 1;
+			// not needed, Date(2020, 12, 1) == Date(2021, 0, 1)
+			/*if (temp.m >= 12){
+			  temp.m = 0
+			  temp.y +=1
+			}*/
+		  }      
+		  return new Date(temp.y, temp.m, temp.d++).toLocaleDateString()
+		});
+	}
+
+	// var weekNumber = "week + " " + year"; //"35 2020"
 
 	
 
