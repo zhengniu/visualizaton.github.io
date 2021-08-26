@@ -107,9 +107,9 @@
 				width: '100%',
 				<!-- WIDTH_IN_PERCENT_OF_PARENT + '%','margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%', -->
 
-				height:'100%',
+				height: '100%',
 				<!-- HEIGHT_IN_PERCENT_OF_PARENT + 'vh','margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh' -->
-				margin: { t: 100, r: 0, l: 0, b: 0 }
+				
 			});
 
 		var gd = gd3.node();
@@ -123,45 +123,45 @@
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_score,
-			title: {text:"Congestion Score<br><span style='font-size:0.8em;color:gray'>week 34, 2021</span>"},			
-			number: {prefix: " ", valueformat:".2f", font:{size:50}},
+			title: {text:"<span style='font-size:1.5em;color:gray'>Congestion Score</span><br><span style='font-size:1.1em;color:gray'></span>"},			
+			number: {prefix: " ", valueformat:".2f", font:{size:28}},
 			domain: {x: [0.1, 0.3], y: [0, 0.5]},
 			delta: { reference: base_score,valueformat: ".1f", relative: false}
 		  },
 		  {
 			type: "indicator",
 			mode: "number+delta",
+			value: ref_cnt,
+			title:{text:"<span style='font-size:1.5em;color:gray'>Jams</span>"},
+			
+			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
+			delta: { reference: base_cnt, valueformat: ",.0f",relative: false },
+			domain: { x: [0.1, 0.3], y: [0.5, 0.9]  }
+		  },		  
+		  {
+			type: "indicator",
+			mode: "number+delta",
 			value: ref_spd,
-			title:"Average Speed",
-			number: {prefix: " ", valueformat:".2f", font:{size:50}},
+			title:{text:"<span style='font-size:1.5em;color:gray'>Average Speed</span><br><span style='font-size:1.1em;color:gray'>km/hr</span>"},
+			number: {prefix: " ", valueformat:".2f", font:{size:28}},
 			delta: { reference: base_spd, valueformat: ".1f",relative: false},
-			domain: { x: [0.1, 0.3], y: [0.5, 0.9] }
+			domain: { x: [0.3, 0.7], y: [0.5, 0.9] }
 		  },
 		  {
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_len,
-			title:"Length",		
-			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
+			title:{text:"<span style='font-size:1.5em;color:gray'>Length</span><br><span style='font-size:1.1em;color:gray'>kilometres</span>"},		
+			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
 			delta: { reference: base_len, valueformat: ",.0f",relative: false },
-			domain: { x: [0.3, 0.6], y: [0, 0.5] }
-		  },
-			{
-			type: "indicator",
-			mode: "number+delta",
-			value: ref_cnt,
-			title:"Count",
-			
-			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
-			delta: { reference: base_cnt, valueformat: ",.0f",relative: false },
-			domain: { x: [0.3, 0.6], y: [0.5, 0.9]  }
+			domain: { x: [0.3, 0.7], y: [0, 0.5] }
 		  },
 		  {
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_dur,
-			title:"Duration",
-			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
+			title:{text:"<span style='font-size:1.5em;color:gray'>Duration</span><br><span style='font-size:1.1em;color:gray'>hours</span>"},
+			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
 			delta: { reference: base_dur, valueformat: ",.0f",relative: false },
 			domain: {  x: [0.6, 0.9], y: [0, 0.5] }
 		  },
@@ -169,30 +169,22 @@
 			type: "indicator",
 			mode: "number+delta",
 			value: ref_del,
-			title:"Delay",
-			number: {prefix: " ", valueformat:",.0f", font:{size:50}},
-			delta: { reference: base_del, valueformat: ",.0f",relative: false },
+			title:{text:"<span style='font-size:1.5em;color:gray'>Delay</span><br><span style='font-size:1.1em;color:gray'>hours</span>"},
+			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
+			delta: { reference: base_del, valueformat: ",.0f",relative: false},
 			domain: {  x: [0.6, 0.9], y: [0.5, 0.9] }
-		  },
-		  {
-			type: "indicator",
-			mode: "number",
-			title:{text:"week 34, 2021 compared to week 34, 2020"},			
-			domain: {  x: [0, 1], y: [0.9, 1] }
 		  }
 		];
 		
 
 
 		var layout = {
-	
+			
 			paper_bgcolor: "lightgray",
 			height: 300,
-			grid: { rows: 2, columns: 6, pattern: "independent"},
-			font: {
-				color: '#ff0000'
-			},			
-			margin: { t: 0, r: 0, l: 0, b: 0 }
+			title: {text:"Week "+String(ref_week).slice(-2) + ', '+String(ref_week).slice(0,4)+' difference from ' + 'Week ' +String(base_week).slice(-2) +','+String(base_week).slice(0,4)},	
+						
+			margin: { t: 80, r: 0, l: 0, b: 0 }
 		};
 
 		Plotly.newPlot(gd, data,layout);		
