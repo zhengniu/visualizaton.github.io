@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="The Ontario Ministry of Transportation iCorridor service provides better understanding of historical, real-time, and forecast information in transportation and land use planning.As the public accessible website, iCorridor supports Ontario's Open Government initiative which makes government information more transparent to the general public. It includes project based land use planning boundaries and detailed demographic data, travel behaviour information (mode shares, highway traffic, and commercial vehicle characteristics), information on road and highway (travel speed and performance indices).">
+		<meta name="author" content="Systems Analysis and Forecasting Office, Ontario Ministry of Transportation">
+		<meta name="keywords" content="Congestion, Transportation, GPS, land use, Truck, Car, Survey, Commercial, Passenger, Forecast, Planning, Highway, Provincial, iCorridor, Corridor,GGH, Greater Golden Horseshoe, GO, Transit, AADT, AADTT, Traffic Volume, Delay, Travel Time, Collision, LHRS, Milepost, Greenbelt, GTHA, Transportation Planning, Transportation Forecasting">
+		<title>MTO iCorridor | Ontario.ca</title>
+		<script src="//www.amcharts.com/lib/4/core.js"></script>
+		<script src="//www.amcharts.com/lib/4/charts.js"></script>
+		<script src="//www.amcharts.com/lib/4/themes/animated.js"></script>
+
+		<script src="//cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
+		<script src="https://js.arcgis.com/4.17/"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js" type="text/javascript"></script>
+		<style>
+			body {
+			  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+			  font-size: 13px;
+			}
+
+			#chartColumns {
+				width: 100%;
+				height: 100px;
+			}
+
+			#chartHeatmap,
+			#chartBars {
+				width: 100%;
+				height: 400px;
+			}
+
+			.col-left { flex: 70%; }
+			.col-right { flex: 30%; }
+
+			@media only screen and (max-width: 600px) {
+			  .col-left { flex: 55%; }
+			  .col-right { flex: 45%; }
+			}		
+		</style>
+	</head>
+	<body id="page-top">
+
+		<div style="padding: 1em;">
+		  <div style="display: flex;">
+			<div class="col-left">
+			  <div id="chartColumns" style="width: 100%; height: 75px;"></div>
+			  <div id="chartHeatmap" style="width: 100%; height: 400px;"></div>
+			</div>
+			<div class="col-right">
+			  <div style="width: 100%; height: 75px;"></div>
+			  <div id="chartBars" style="width: 100%; height: 400px;"></div>
+			</div>
+		  </div>
+		</div>
+	</body>
+	
+	<script>
+	require(["esri/layers/FeatureLayer","esri/smartMapping/statistics/uniqueValues"],function(FeatureLayer, uniqueValues){
+		var dataLayer = new FeatureLayer({
+			  url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_dow_hour_archived/FeatureServer/0",
+			  outFields: ["*"],
+			  visible: false
+			});
+		var query = dataLayer.createQuery();
+		renderchart();	
+		
+		
+		var dow_dataLayer = new FeatureLayer({
+			url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_provincial_highways_dow_view/FeatureServer/0",
+			outFields: ["*"],
+			visible: false
+		});
+		var dow_query = dow_dataLayer.createQuery();
+		dow_renderchart();
+		var tod_dataLayer = new FeatureLayer({
+			url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_provincial_highways_tod_view/FeatureServer/0",
+			outFields: ["*"],
+			visible: false
+		});
+		var tod_query = tod_dataLayer.createQuery();
+		tod_renderchart();
+		
+		function formatTimeShow(h_24) {
+			var h = h_24 % 12;
+			if (h === 0) h = 12;
+			return (h < 10 ? '' : '') + h  +' '+ (h_24 < 12 ? 'am' : 'pm');
+		}	
+		function dow_renderchart(){
+			dow_query.orderByFields = ["Days ASC"];
+			dow_dataLayer.queryFeatures(dow_query).then(function(results){
+				let dow_dataset=[];
+				let returnresults = results.features;
+				for (i=0; i<returnresults.length; i++){
+					let a=returnresults[i];
+					dow_dataset.push({
+							"weekday":a.attributes.DOW,
+							"value":parseInt(a.attributes.Congestion_Score)
+						});
+				}
+				chart2.data=dow_dataset;
+			});
+		}
+		function tod_renderchart(){
+			tod_query.orderByFields = ["Hour ASC"];
+			tod_dataLayer.queryFeatures(tod_query).then(function(results){
+				let tod_dataset=[];
+				let tod_results = results.features;
+				for (i=0; i<tod_results.length; i++){
+					let b=tod_results[i];
+					console.log(b.attributes.Hour, ' ',formatTimeShow(b.attributes.Hour-1), ' ',  parseInt(b.attributes.Congestion_Score)); 
+					tod_dataset.push({
+						"hour":formatTimeShow(b.attributes.Hour-1),
+						"value":parseInt(b.attributes.Congestion_Score)
+					});
+				}
+				chart3.data=tod_dataset;
+			});
+		}
+		function renderchart(corridor){
+			//var condition="Corridor='"+corridor+"'";
+			//query.where = condition;
+			query.orderByFields = ["DOW ASC, TOD ASC"];
+			dataLayer.queryFeatures(query).then(function(results){
+				let dataset=[];
+				
+				let returnsets=results.features;
+
+				
+				let timeseries_dataset=[];
+				for (j=1; j<8; j++){
+					switch (j) {
+					  case 1:
+						cday = "Sunday";
+						break;
+					  case 2:
+						cday = "Monday";
+						break;
+					  case 3:
+						cday = "Tuesday";
+						break;
+					  case 4:
+						cday = "Wednesday";
+						break;
+					  case 5:
+						cday = "Thursday";
+						break;
+					  case 6:
+						cday = "Friday";
+						break;
+					  case  7:
+						cday = "Saturday";
+					}
+					for (k=0; k<24; k++){
+						
+						timeseries_dataset.push({
+							"value":0,
+							"weekday":cday,
+							"hour":formatTimeShow(k)
+						});
+					}
+				}
+				
+				
+				for (i=0; i<returnsets.length; i++){
+					
+					a=returnsets[i];
+					switch (a.attributes.DOW) {
+					  case 1:
+						day = "Sunday";
+						break;
+					  case 2:
+						day = "Monday";
+						break;
+					  case 3:
+						day = "Tuesday";
+						break;
+					  case 4:
+						day = "Wednesday";
+						break;
+					  case 5:
+						day = "Thursday";
+						break;
+					  case 6:
+						day = "Friday";
+						break;
+					  case  7:
+						day = "Saturday";
+					}
+
+					for (f=0;f<timeseries_dataset.length;f++){
+						if (timeseries_dataset[f].weekday ==day && timeseries_dataset[f].hour==formatTimeShow(a.attributes.TOD)){
+							timeseries_dataset[f].value=parseInt(a.attributes.Congestion_Score);
+							
+						}
+						
+					}			
+
+				}
+				console.log(timeseries_dataset);
+				chart.data=timeseries_dataset;
+			});
+		
+		}		
+		
+	
+
+		<!-- let minValue = Math.min.apply(Math, __dataHeatmap.map(function (o) { return o.value; })); -->
+		<!-- let minValue2 = Math.min.apply(Math, __dataColumnChart.map(function (o) { return o.value; })); -->
+		<!-- let minValue3 = Math.min.apply(Math, __dataBarChart.map(function (o) { return o.value; })); -->
+
+		<!-- let maxValue = Math.max.apply(Math, __dataHeatmap.map(function (o) { return o.value; })); -->
+		<!-- let maxValue2 = Math.max.apply(Math, __dataColumnChart.map(function (o) { return o.value; })); -->
+		<!-- let maxValue3 = Math.max.apply(Math, __dataBarChart.map(function (o) { return o.value; })); -->
+
+
+		<!-- // https://colorbrewer2.org -->
+		<!-- // https://gka.github.io/chroma.js/#chroma-scale -->
+		<!-- let colors = ['#2171b5', '#4292c6','#6baed6', '#9ecae1', '#c6dbef', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d']; -->
+		<!-- let colorScale = chroma.scale(colors).domain([minValue, maxValue]); -->
+		<!-- let colorScale2 = chroma.scale(colors).domain([minValue2, maxValue2]); -->
+		<!-- let colorScale3 = chroma.scale(colors).domain([minValue3, maxValue3]); -->
+
+					/* HACK for even left side spacing */
+		let hackForLeftSideSpacing = 53;
+
+
+		let chart = am4core.create("chartHeatmap", am4charts.XYChart);
+		<!-- chart.data = __dataHeatmap; -->
+		chart.maskBullets = false;
+
+		let xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+		let yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+
+		xAxis.dataFields.category = "weekday";
+		yAxis.dataFields.category = "hour";
+
+		xAxis.renderer.grid.template.disabled = true;
+		xAxis.renderer.minGridDistance = 40;
+		xAxis.renderer.opposite = true;
+
+		yAxis.renderer.grid.template.disabled = true;
+		yAxis.renderer.inversed = true;
+		yAxis.renderer.minGridDistance = 30;
+
+		yAxis.width = hackForLeftSideSpacing;
+
+		let cseries = chart.series.push(new am4charts.ColumnSeries());
+		cseries.dataFields.categoryX = "weekday";
+		cseries.dataFields.categoryY = "hour";
+		cseries.dataFields.value = "value";
+		cseries.sequencedInterpolation = true;
+		cseries.defaultState.transitionDuration = 3000;
+		cseries.columns.template.width = am4core.percent(100);
+		cseries.columns.template.height = am4core.percent(100);
+	
+		let columnTemplate = cseries.columns.template;
+		columnTemplate.strokeWidth = 0.5;
+		columnTemplate.strokeOpacity = 1;
+		columnTemplate.stroke = am4core.color("#ffffff");
+		columnTemplate.tooltipText = "{weekday}, {hour}: {value.workingValue.formatNumber('#.')}";
+		columnTemplate.width = am4core.percent(100);
+		columnTemplate.height = am4core.percent(100);
+		
+		var bullet = cseries.bullets.push(new am4charts.LabelBullet());
+		bullet.label.text = "{value}";
+		bullet.label.fill = am4core.color("#fff");
+		bullet.zIndex = 1;
+		bullet.fontSize = 11;
+		bullet.interactionsEnabled = false;
+
+		
+		<!-- columnTemplate.column.adapter.add("fill", function (fill, target) { -->
+			<!-- if (target.dataItem) { -->
+				<!-- let value = target.dataItem.getActualWorkingValue('value'); -->
+				<!-- return am4core.color(colorScale(value).css()); -->
+			<!-- } -->
+			<!-- return fill; -->
+		<!-- }); -->
+		cseries.heatRules.push({ target: columnTemplate, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109") });
+		<!-- var heatLegend_dow_hour = chart.bottomAxesContainer.createChild(am4charts.HeatLegend); -->
+		<!-- heatLegend_dow_hour.width = am4core.percent(100); -->
+		<!-- heatLegend_dow_hour.series = cseries; -->
+		<!-- heatLegend_dow_hour.valueAxis.renderer.labels.template.fontSize = 9; -->
+		<!-- heatLegend_dow_hour.valueAxis.renderer.minGridDistance = 30; -->
+		<!-- top horizontal day of week chart --- chart2 -->
+		let chart2 = am4core.create("chartColumns", am4charts.XYChart);
+		<!-- chart2.data = __dataColumnChart; -->
+		let categoryAxis2 = chart2.xAxes.push(new am4charts.CategoryAxis());
+		categoryAxis2.dataFields.category = "weekday";
+
+		let valueAxis2 = chart2.yAxes.push(new am4charts.ValueAxis());
+
+
+		chart2.paddingBottom = 0;
+
+		valueAxis2.width = hackForLeftSideSpacing;
+
+		valueAxis2.renderer.grid.template.disabled = true;
+		valueAxis2.renderer.baseGrid.disabled = true;
+		valueAxis2.renderer.labels.template.disabled = true;
+		categoryAxis2.renderer.grid.template.disabled = true;
+		categoryAxis2.renderer.baseGrid.disabled = true;
+		categoryAxis2.renderer.labels.template.disabled = true;
+
+		let series2 = chart2.series.push(new am4charts.ColumnSeries());
+		series2.dataFields.valueY = "value";
+		series2.dataFields.categoryX = "weekday";
+		series2.sequencedInterpolation = true;
+		series2.defaultState.transitionDuration = 3000;
+		series2.dataFields.value = "value";
+		
+		let columnTemplate2 = series2.columns.template;
+		columnTemplate2.width = am4core.percent(90);
+		columnTemplate2.strokeWidth = 0.25;
+		columnTemplate2.strokeOpacity = 1;
+		columnTemplate2.stroke = am4core.color("#ffffff");
+
+		columnTemplate2.tooltipText = "{weekday}: {value}";
+
+
+		<!-- columnTemplate2.column.adapter.add("fill", function (fill, target) { -->
+			<!-- if (target.dataItem) { -->
+				<!-- let value = target.dataItem.getActualWorkingValue('valueY'); -->
+				<!-- return am4core.color(colorScale2(value).css()); -->
+			<!-- } -->
+			<!-- else { -->
+				<!-- return fill; -->
+			<!-- } -->
+		<!-- }); -->
+
+		series2.heatRules.push({ target: columnTemplate2, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109") });
+
+		<!-- right vertical hour chart --- chart3-->
+		let chart3 = am4core.create("chartBars", am4charts.XYChart);
+		<!-- chart3.data = __dataBarChart; -->
+		chart3.paddingLeft = 0;
+		let categoryAxis3 = chart3.yAxes.push(new am4charts.CategoryAxis());
+		categoryAxis3.dataFields.category = "hour";
+		categoryAxis3.renderer.grid.template.disabled = true;
+		categoryAxis3.renderer.minGridDistance = 30;
+		categoryAxis3.renderer.inversed = true;
+
+		
+		categoryAxis3.width = hackForLeftSideSpacing;
+
+		let valueAxis3 = chart3.xAxes.push(new am4charts.ValueAxis());
+		valueAxis3.renderer.opposite = true;
+		valueAxis3.renderer.grid.template.disabled = true;
+		valueAxis3.renderer.baseGrid.disabled = true;
+		valueAxis3.max =100;
+		let series3 = chart3.series.push(new am4charts.ColumnSeries());
+		series3.dataFields.categoryY = "hour";
+		series3.dataFields.valueX = "value";
+		series3.dataFields.value = "value";
+		let columnTemplate3 = series3.columns.template;
+		columnTemplate3.height = am4core.percent(90);
+		columnTemplate3.strokeWidth = 0.25;
+		columnTemplate3.strokeOpacity = 1;
+		columnTemplate3.stroke = am4core.color("#ffffff");
+		columnTemplate3.tooltipText = "{hour}: {value}";
+		<!-- columnTemplate3.column.adapter.add("fill", function (fill, target) { -->
+			<!-- if (target.dataItem) { -->
+				<!-- let value = target.dataItem.getActualWorkingValue('valueX'); -->
+				<!-- return am4core.color(colorScale3(value).css()); -->
+			<!-- } -->
+			<!-- else { -->
+				<!-- return fill; -->
+			<!-- } -->
+		<!-- });	 -->
+		series3.heatRules.push({ target: columnTemplate3, property: "fill", min: am4core.color("#e6e6e6"), max: am4core.color("#e40109") });
+	});
+	</script>
+	
+</html>
