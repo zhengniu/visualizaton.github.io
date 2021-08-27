@@ -58,7 +58,7 @@
 		var returnsets=results.features;
 		<!-- console.log(returnsets); -->
 		
-		ref_week=returnsets[1].attributes.Week;
+		ref_week=returnsets[0].attributes.Week;
 		console.log('previous week ', ref_week);
 		let timeseries_set=[];
 		for (i=0; i<returnsets.length; i++){
@@ -144,7 +144,7 @@
 			title: {text:"<span style='font-size:1.5em;color:gray'>Congestion Score</span><br><span style='font-size:1.1em;color:gray'></span>"},			
 			number: {prefix: " ", valueformat:".1f", font:{size:28}},
 			domain: {x: [0.1, 0.3], y: [0, 0.5]},
-			delta: { reference: base_score,valueformat: ".1f", relative: false}
+			delta: { reference: base_score,valueformat: ".1f", relative: false,increasing:{color:'#ff4136'},decreasing:{color:'#3d9970'}}
 		  },
 		  {
 			type: "indicator",
@@ -153,7 +153,7 @@
 			title:{text:"<span style='font-size:1.5em;color:gray'>Jams</span>"},
 			
 			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
-			delta: { reference: base_cnt, valueformat: ",.0f",relative: false },
+			delta: { reference: base_cnt, valueformat: ",.0f",relative: false,increasing:{color:'#ff4136'},decreasing:{color:'#3d9970'} },
 			domain: { x: [0.1, 0.3], y: [0.5, 0.9]  }
 		  },		  
 		  {
@@ -171,7 +171,7 @@
 			value: ref_len,
 			title:{text:"<span style='font-size:1.5em;color:gray'>Length</span><br><span style='font-size:1.1em;color:gray'>kilometres</span>"},		
 			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
-			delta: { reference: base_len, valueformat: ",.0f",relative: false },
+			delta: { reference: base_len, valueformat: ",.0f",relative: false, increasing:{color:'#ff4136'},decreasing:{color:'#3d9970'}},
 			domain: { x: [0.3, 0.7], y: [0, 0.5] }
 		  },
 		  {
@@ -180,7 +180,7 @@
 			value: ref_dur,
 			title:{text:"<span style='font-size:1.5em;color:gray'>Duration</span><br><span style='font-size:1.1em;color:gray'>hours</span>"},
 			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
-			delta: { reference: base_dur, valueformat: ",.0f",relative: false },
+			delta: { reference: base_dur, valueformat: ",.0f",relative: false,increasing:{color:'#ff4136'},decreasing:{color:'#3d9970'} },
 			domain: {  x: [0.6, 0.9], y: [0, 0.5] }
 		  },
 		  {
@@ -189,7 +189,7 @@
 			value: ref_del,
 			title:{text:"<span style='font-size:1.5em;color:gray'>Delay</span><br><span style='font-size:1.1em;color:gray'>hours</span>"},
 			number: {prefix: " ", valueformat:",.0f", font:{size:28}},
-			delta: { reference: base_del, valueformat: ",.0f",relative: false},
+			delta: { reference: base_del, valueformat: ",.0f",relative: false,increasing:{color:'#ff4136'},decreasing:{color:'#3d9970'}},
 			domain: {  x: [0.6, 0.9], y: [0.5, 0.9] }
 		  }
 		];
