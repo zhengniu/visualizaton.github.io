@@ -161,7 +161,7 @@
 	});
 
 	var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-	valueAxis.max =100;
+	//valueAxis.max =100;
 	// Create series
 	function createSeries(field, name) {
 	  var series = chart.series.push(new am4charts.LineSeries());
@@ -199,17 +199,7 @@
 	  bullet.tooltipText = "on{dateX} [b] {name}: {valueY}[/]";
 	  return series;
 	}
-	chart.colors.list = [
-		am4core.color("#000000"),
-		am4core.color("#002233"),
-		am4core.color("#004466"),
-		am4core.color("#006699"),
-		am4core.color("#0088cc"),
-		am4core.color("#61caff"),
-		am4core.color("#99ddff"),
-		am4core.color("#e6f7ff"),
-		
-	]
+
 	createSeries("prov", "Province");
 	createSeries("ggh", "GGH");
 	createSeries("toronto", "Toronto");
