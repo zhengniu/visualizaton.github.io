@@ -16,6 +16,7 @@
 	<script src="//www.amcharts.com/lib/4/themes/kelly.js"></script>
 	<script src="//www.amcharts.com/lib/4/plugins/bullets.js"></script>
 	<script src="//cdn.amcharts.com/lib/4/plugins/overlapBuster.js"></script> 
+	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 	<script src="https://js.arcgis.com/4.17/"></script>
     <style>
 	
@@ -28,13 +29,17 @@
 		  width: 100%;
 		  height: 400px;
 		}
+		#statsdiv {
+		  width: 100%;
+		  height: 300px;
+		}		
 	</style>
 
   </head>
 
   <body id="page-top">
 	<div id="chartdiv"></div>
-   
+	<div id="statsdiv"></div>
   </body>
 <script>
 /**
@@ -49,6 +54,7 @@
  * ---------------------------------------
  */
  require(["esri/layers/FeatureLayer"],function(FeatureLayer){
+	var currYear=2021;
 	var dataLayer = new FeatureLayer({
           url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/Congestion_score_provincial_highway_daily_view/FeatureServer",
           outFields: ["*"],
@@ -199,10 +205,20 @@
 	  bullet.tooltipText = "on{dateX} [b] {name}: {valueY}[/]";
 	  return series;
 	}
-
+	chart.colors.list = [
+		am4core.color("#000000"),
+		am4core.color("#002233"),
+		am4core.color("#004466"),
+		am4core.color("#006699"),
+		am4core.color("#0088cc"),
+		am4core.color("#61caff"),
+		am4core.color("#99ddff"),
+		am4core.color("#e6f7ff"),
+		
+	]
 	createSeries("prov", "Province");
-	createSeries("ggh", "GGH");
 	createSeries("toronto", "Toronto");
+	createSeries("ggh", "GGH");
 	createSeries("york", "York");
 	createSeries("peel", "Peel");
 	createSeries("halton", "Halton");
@@ -227,13 +243,13 @@
 	  var flag = new am4plugins_bullets.FlagBullet();
 	  
 
-          flag.label.text = text;
+      flag.label.text = text;
 	  flag.label.horizontalCenter = "middle";
 	  flag.label.fontSize = 15;
-          flag.label.fill="#FFFFFF";
+      flag.label.fill="#FFFFFF";
           //flag.label.fontWeight="bold";
-		  flag.label.wrap = true;
-flag.label.maxWidth = 140;
+	  flag.label.wrap = true;
+      flag.label.maxWidth = 140;
 	  
 	  flag.pole.stroke = "#004080";
 	  flag.pole.strokeWidth = 2;
@@ -275,11 +291,40 @@ flag.label.maxWidth = 140;
 	createEvent(new Date(2021, 5, 11,12, 0, 0), "Step 1 of the Roadmap To Reopen plan", am4core.color("#950402"));
 	createEvent(new Date(2021, 5, 30,12, 0, 0), "Step 2 of the Roadmap To Reopen plan", am4core.color("#950402"));
 	createEvent(new Date(2021, 6, 16,12, 0, 0), "Step 3 of the Roadmap To Reopen plan", am4core.color("#950402"));
-	createEvent(new Date(2021, 7, 17,12, 0, 0),"Pausing the exit from the Roadmap to Reopen", am4core.color("#950402"));
+	
+	///// Stats - worst dates 8 
+	var d3 = Plotly.d3;
+	var gd3 = d3.select('#statsdiv')
+		.append('div')
+		.style({
+			width: '100%',
+			<!-- WIDTH_IN_PERCENT_OF_PARENT + '%','margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%', -->
+
+			height: '100%',
+			<!-- HEIGHT_IN_PERCENT_OF_PARENT + 'vh','margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh' -->
+			
+		});
+
+	var gd = gd3.node();
+	var layout = {	
+		height: 300,
+		title: {text:"Worst Date in "+currYear},	
+					
+		margin: { t: 80, r: 0, l: 0, b: 0 }
+	};
+
+		
+
+	window.onresize = function() {
+		Plotly.Plots.resize(gd);
+	};	
 //var timeseries_set=[];
 	dataLayer.queryFeatures(query).then(function(results){
+		var stats_data=[];
 		var returnsets=results.features;
 		let timeseries_set=[];
+		let prov_worst_date=0;
+		let prov_worst_score=0;
 		for (i=0; i<returnsets.length; i++){
 			a=returnsets[i];
 			
@@ -294,14 +339,31 @@ flag.label.maxWidth = 140;
 				"niagara":0,
 				"toronto":0,
 			});
+			//console.log(typeof(a.attributes.Row_Labels), new Date(a.attributes.Row_Labels));
+			let newdate=new Date(a.attributes.Row_Labels);
+			if (a.attributes.Congestion_Score>prov_worst_score && newdate.getFullYear()==currYear){
+				prov_worst_score=a.attributes.Congestion_Score;
+				prov_worst_date=a.attributes.Row_Labels;
+			}
 			
 		}
-		
+		console.log("worst Date ", new Date(prov_worst_date), ' ', ' congestion ', prov_worst_score);
+		stats_data.push(
+		  {
+			type: "indicator",
+			mode: "number",
+			value: prov_worst_score,
+			title:  {text:"<span style='font-size:2.5em;color:gray'>"+'Province'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(prov_worst_date)).toDateString()+"</span>"},			
+			number: {prefix: "", valueformat:".1f", font:{size:24}},
+			domain: {x: [0, 0.25], y: [0.7, 1]}
+		  });
+		console.log(stats_data);
 		//chart.data=timeseries_dataset;
 		//addresults(returnsets);
 		dataLayer_ggh.queryFeatures(query_ggh).then(function(results){
 			var returnsets=results.features;
-
+			let ggh_worst_date=0;
+			let ggh_worst_score=0;
 			//addresults(returnsets);
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -313,14 +375,29 @@ flag.label.maxWidth = 140;
 						timeseries_set[j].ggh=a.attributes.Congestion_Score;
 					}
 				}
+				let newdate=new Date(a.attributes.Row_Labels);
+				if (a.attributes.Congestion_Score>ggh_worst_score && newdate.getFullYear()==currYear){
+					ggh_worst_score=a.attributes.Congestion_Score;
+					ggh_worst_date=a.attributes.Row_Labels;
+				}				
 			}
-			
+			console.log("worst Date GGH ", new Date(ggh_worst_date), ' ', ' congestion ', ggh_worst_score);
 			chart.data=timeseries_set;
+			stats_data.push({
+				type: "indicator",
+				mode: "number",
+				value: ggh_worst_score,
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'GGH'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(ggh_worst_date)).toDateString()+"</span>"},			
+				number: {prefix: "", valueformat:".1f", font:{size:24}},
+				domain: {x: [0.25, 0.5], y: [0.7, 1]}
+			});	
+			//Plotly.newPlot(gd, stats_data,layout);
 		});
 		
 		dataLayer_york.queryFeatures(query_york).then(function(results){
 			var returnsets=results.features;
-
+			let york_worst_date=0;
+			let york_worst_score=0;
 			//addresults(returnsets);
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -331,13 +408,28 @@ flag.label.maxWidth = 140;
 						timeseries_set[j].york=a.attributes.Congestion_Score;
 					}
 				}
+				let newdate=new Date(a.attributes.Row_Labels);
+				if (a.attributes.Congestion_Score>york_worst_score && newdate.getFullYear()==currYear){
+					york_worst_score=a.attributes.Congestion_Score;
+					york_worst_date=a.attributes.Row_Labels;
+				}					
 			}
-			
+			console.log("worst Date in York ", new Date(york_worst_date), ' ', ' congestion ', york_worst_score);
 			chart.data=timeseries_set;
+			stats_data.push({
+				type: "indicator",
+				mode: "number",
+				value: york_worst_score,
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'York'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(york_worst_date)).toDateString()+"</span>"},			
+				number: {prefix: "", valueformat:".1f", font:{size:24}},
+				domain: {x: [0.5, 0.75], y: [0.7, 1]}
+			});	
+			//Plotly.newPlot(gd, stats_data,layout);			
 		});		
 		dataLayer_peel.queryFeatures(query_peel).then(function(results){
 			var returnsets=results.features;
-
+			let peel_worst_date=0;
+			let peel_worst_score=0;
 			//addresults(returnsets);
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -348,13 +440,28 @@ flag.label.maxWidth = 140;
 						timeseries_set[j].peel=a.attributes.Congestion_Score;
 					}
 				}
-			}
-			
+				let newdate=new Date(a.attributes.Row_Labels);
+				if (a.attributes.Congestion_Score>peel_worst_score && newdate.getFullYear()==currYear){
+					peel_worst_score=a.attributes.Congestion_Score;
+					peel_worst_date=a.attributes.Row_Labels;
+				}				
+			}			
+			console.log("worst Date in Peel ", new Date(peel_worst_date), ' ', ' congestion ', peel_worst_score);			
 			chart.data=timeseries_set;
+			stats_data.push({
+				type: "indicator",
+				mode: "number",
+				value: peel_worst_score,
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Peel'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(peel_worst_date)).toDateString()+"</span>"},			
+				number: {prefix: "", valueformat:".1f", font:{size:24}},
+				domain: {x: [0.75, 1], y: [0.7, 1]}
+			});	
+			//Plotly.newPlot(gd, stats_data,layout);			
 		});	
 		dataLayer_halton.queryFeatures(query_halton).then(function(results){
 			var returnsets=results.features;
-
+			let halton_worst_date=0;
+			let halton_worst_score=0;
 			//addresults(returnsets);
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -365,13 +472,28 @@ flag.label.maxWidth = 140;
 						timeseries_set[j].halton=a.attributes.Congestion_Score;
 					}
 				}
+				let newdate=new Date(a.attributes.Row_Labels);
+				if (a.attributes.Congestion_Score>halton_worst_score && newdate.getFullYear()==currYear){
+					halton_worst_score=a.attributes.Congestion_Score;
+					halton_worst_date=a.attributes.Row_Labels;
+				}						
 			}
-			
+			console.log("worst Date in Halton ", new Date(halton_worst_date), ' ', ' congestion ', halton_worst_score);			
 			chart.data=timeseries_set;
+			stats_data.push({
+				type: "indicator",
+				mode: "number",
+				value: halton_worst_score,
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Halton'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(halton_worst_date)).toDateString()+"</span>"},			
+				number: {prefix: "", valueformat:".1f", font:{size:24}},
+				domain: {x: [0, 0.25], y: [0.3, 0.6]}
+			});	
+			//Plotly.newPlot(gd, stats_data,layout);			
 		});		
 		dataLayer_durham.queryFeatures(query_durham).then(function(results){
 			var returnsets=results.features;
-
+			let durham_worst_date=0;
+			let durham_worst_score=0;
 			//addresults(returnsets);
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -382,14 +504,28 @@ flag.label.maxWidth = 140;
 						timeseries_set[j].durham=a.attributes.Congestion_Score;
 					}
 				}
+				let newdate=new Date(a.attributes.Row_Labels);
+				if (a.attributes.Congestion_Score>durham_worst_score && newdate.getFullYear()==currYear){
+					durham_worst_score=a.attributes.Congestion_Score;
+					durham_worst_date=a.attributes.Row_Labels;
+				}				
 			}
-			
+			console.log("worst Date in Durham ", new Date(durham_worst_date), ' ', ' congestion ', durham_worst_score);
 			chart.data=timeseries_set;
-		
+			stats_data.push({
+				type: "indicator",
+				mode: "number",
+				value: durham_worst_score,
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Durham'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(durham_worst_date)).toDateString()+"</span>"},			
+				number: {prefix: "", valueformat:".1f", font:{size:24}},
+				domain: {x: [0.25, 0.5], y: [0.3, 0.6]}
+			});	
+			//Plotly.newPlot(gd, stats_data,layout);		
 		});	
 		dataLayer_niagara.queryFeatures(query_niagara).then(function(results){
 			var returnsets=results.features;
-
+			let niagara_worst_date=0;
+			let niagara_worst_score=0;
 			//addresults(returnsets);
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -400,13 +536,28 @@ flag.label.maxWidth = 140;
 						timeseries_set[j].niagara=a.attributes.Congestion_Score;
 					}
 				}
+				let newdate=new Date(a.attributes.Row_Labels);
+				if (a.attributes.Congestion_Score>niagara_worst_score && newdate.getFullYear()==currYear){
+					niagara_worst_score=a.attributes.Congestion_Score;
+					niagara_worst_date=a.attributes.Row_Labels;
+				}				
 			}
-			
+			console.log("worst Date in Niagara ", new Date(niagara_worst_date), ' ', ' congestion ', niagara_worst_score);
 			chart.data=timeseries_set;
+			stats_data.push({
+				type: "indicator",
+				mode: "number",
+				value: niagara_worst_score,
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Niagara'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(niagara_worst_date)).toDateString()+"</span>"},			
+				number: {prefix: "", valueformat:".1f", font:{size:24}},
+				domain: {x: [0.5, 0.75], y: [0.3, 0.6]}
+			});	
+			//Plotly.newPlot(gd, stats_data,layout);			
 		});	
 		dataLayer_toronto.queryFeatures(query_toronto).then(function(results){
 			var returnsets=results.features;
-
+			let toronto_worst_date=0;
+			let toronto_worst_score=0;
 			//addresults(returnsets);
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -417,12 +568,28 @@ flag.label.maxWidth = 140;
 						timeseries_set[j].toronto=a.attributes.Congestion_Score;
 					}
 				}
+				let newdate=new Date(a.attributes.Row_Labels);
+				if (a.attributes.Congestion_Score>toronto_worst_score && newdate.getFullYear()==currYear){
+					toronto_worst_score=a.attributes.Congestion_Score;
+					toronto_worst_date=a.attributes.Row_Labels;
+				}					
 			}
-			
+			console.log("worst Date in Toronto ", new Date(toronto_worst_date), ' ', ' congestion ', toronto_worst_score);
 			chart.data=timeseries_set;
-		});			
+			stats_data.push({
+				type: "indicator",
+				mode: "number",
+				value: toronto_worst_score,
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Toronto'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(toronto_worst_date)).toDateString()+"</span>"},			
+				number: {prefix: "", valueformat:".1f", font:{size:24}},
+				domain: {x: [0.75, 1], y: [0.3, 0.6]}
+			});	
+			Plotly.newPlot(gd, stats_data,layout);				
+		});	
+		console.log(timeseries_set);
+		Plotly.newPlot(gd, stats_data,layout);
 	});
-
+	
 	
 
 
