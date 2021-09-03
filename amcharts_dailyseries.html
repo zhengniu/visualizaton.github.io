@@ -353,7 +353,7 @@
 			type: "indicator",
 			mode: "number",
 			value: prov_worst_score,
-			title:  {text:"<span style='font-size:2.5em;color:gray'>"+'Province'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(prov_worst_date)).toDateString()+"</span>"},			
+			title:  {text:"<span style='font-size:2.5em;color:gray'>"+'Province'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(prov_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 			number: {prefix: "", valueformat:".1f", font:{size:20}},
 			domain: {x: [0, 0.25], y: [0.5, 1]}
 		  });
@@ -387,7 +387,7 @@
 				type: "indicator",
 				mode: "number",
 				value: ggh_worst_score,
-				title: {text:"<span style='font-size:2.5em;color:gray'>"+'GGH'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(ggh_worst_date)).toDateString()+"</span>"},			
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'GGH'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(ggh_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 				number: {prefix: "", valueformat:".1f", font:{size:20}},
 				domain: {x: [0.25, 0.5], y: [0.5, 1]}
 			});	
@@ -420,7 +420,7 @@
 				type: "indicator",
 				mode: "number",
 				value: york_worst_score,
-				title: {text:"<span style='font-size:2.5em;color:gray'>"+'York'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(york_worst_date)).toDateString()+"</span>"},			
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'York'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(york_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 				number: {prefix: "", valueformat:".1f", font:{size:20}},
 				domain: {x: [0.5, 0.75], y: [0.5, 1]}
 			});	
@@ -452,7 +452,7 @@
 				type: "indicator",
 				mode: "number",
 				value: peel_worst_score,
-				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Peel'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(peel_worst_date)).toDateString()+"</span>"},			
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Peel'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(peel_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 				number: {prefix: "", valueformat:".1f", font:{size:20}},
 				domain: {x: [0.75, 1], y: [0.5, 1]}
 			});	
@@ -484,7 +484,7 @@
 				type: "indicator",
 				mode: "number",
 				value: halton_worst_score,
-				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Halton'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(halton_worst_date)).toDateString()+"</span>"},			
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Halton'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(halton_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 				number: {prefix: "", valueformat:".1f", font:{size:20}},
 				domain: {x: [0, 0.25], y: [0, 0.5]}
 			});	
@@ -516,7 +516,7 @@
 				type: "indicator",
 				mode: "number",
 				value: durham_worst_score,
-				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Durham'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(durham_worst_date)).toDateString()+"</span>"},			
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Durham'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(durham_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 				number: {prefix: "", valueformat:".1f", font:{size:20}},
 				domain: {x: [0.25, 0.5], y: [0, 0.5]}
 			});	
@@ -548,7 +548,7 @@
 				type: "indicator",
 				mode: "number",
 				value: niagara_worst_score,
-				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Niagara'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(niagara_worst_date)).toDateString()+"</span>"},			
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Niagara'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(niagara_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 				number: {prefix: "", valueformat:".1f", font:{size:20}},
 				domain: {x: [0.5, 0.75], y: [0, 0.5]}
 			});	
@@ -580,7 +580,7 @@
 				type: "indicator",
 				mode: "number",
 				value: toronto_worst_score,
-				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Toronto'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(toronto_worst_date)).toDateString()+"</span>"},			
+				title: {text:"<span style='font-size:2.5em;color:gray'>"+'Toronto'+"</span><br><br><span style='font-size:2em;color:gray'>"+(new Date(toronto_worst_date)).toDateString().slice(0, 11) +"</span>"},			
 				number: {prefix: "", valueformat:".1f", font:{size:20}},
 				domain: {x: [0.75, 1], y: [0, 0.5]}
 			});	
