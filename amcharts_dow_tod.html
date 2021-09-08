@@ -152,15 +152,18 @@
 </body>
 <script>
 
- require(["esri/layers/FeatureLayer","esri/smartMapping/statistics/uniqueValues"],function(FeatureLayer, uniqueValues){
+ require(["esri/layers/FeatureLayer","esri/smartMapping/statistics/uniqueValues","esri/request","dojo/_base/json"],function(FeatureLayer, uniqueValues,esriRequest,dojoJson){
 	var dataLayer_dow_hour = new FeatureLayer({
-          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_corridor_dow_hour_archived/FeatureServer/0",
-          outFields: ["*"],
-          visible: false
+          //url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_corridor_dow_hour_archived/FeatureServer/0",
+		  url:"https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/pub_gdb/FeatureServer/1",
+          outFields: ["City","Corridor","Congestion_Score","DOW", "Hour","Ad_Cong_Score"],
+          visible: false,
+		  definitionExpression: "City is not null"
         });
 	// Apply chart themes
 	// Themes begin	
-	var query_dow_hour = dataLayer_dow_hour.createQuery();
+	
+	
 	am4core.useTheme(am4themes_animated);
 	// Themes end
     // Default chart renderchart
@@ -244,14 +247,7 @@
 	  handleHover_dow(event.target);
 	})
     /////////////////////////////xydynaminc - end////////////////////////////////////
-	var dataLayer = new FeatureLayer({
-          url: "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/congestion_score_corridor_week_hour_archived/FeatureServer/0",
-          outFields: ["*"],
-          visible: false
-        });
-	// Apply chart themes
-	// Themes begin	
-	var query = dataLayer.createQuery();
+
 	renderchart("Hwy 401 Express E in CITY OF TORONTO");
 	// Apply chart themes
 	am4core.useTheme(am4themes_animated);
@@ -432,7 +428,7 @@
 		var infos = response.uniqueValueInfos;
         var corridors = [];
 		infos.forEach(function(info){
-
+			
 			corridors.push(info.value);
 						
 		});
@@ -475,52 +471,34 @@
 
     
 	function renderchart(corridor){
+		// json_query
+		console.log(corridor);
+		var json_condition='QEW Toronto in CITY OF TORONTO';
+
 		var condition="Corridor='"+corridor+"'";
-		///////////////xydynamic////////////////////////////////
-		query.where = condition;
-		query.orderByFields = ["Week ASC, Hour ASC"];
-		dataLayer.queryFeatures(query).then(function(results){
-			
-			returnsets=results.features;
-			let unique_corridors=[];
-			for (i=0; i<returnsets.length; i++){
-				a=returnsets[i];
-				if (!unique_corridors.includes(a.attributes.Corridor)) {
-				  unique_corridors.push(a.attributes.Corridor);
-				}
+		var dow_tod_url = "https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/pub_gdb/FeatureServer/1/query?f=json&orderByFields=DOW%20ASC%2C%20Hour%20ASC&outFields=*&spatialRel=esriSpatialRelIntersects&where=".concat(condition);
+		var woy_tod_url="https://services.arcgis.com/6iGx1Dq91oKtcE7x/arcgis/rest/services/pub_gdb/FeatureServer/0/query?f=json&orderByFields=Week%20ASC%2C%20Hour%20ASC&outFields=*&spatialRel=esriSpatialRelIntersects&where=".concat(condition);	
+		
+		//console.log(dow_tod_url);
+		//console.log(woy_tod_url);
+		
+		var dow_tod_requestHandle = esriRequest(
+            dow_tod_url,{
+			  responseType: "json"
 			}
-			let timeseries_data=[];	
-			for (i=0;i<unique_corridors.length; i++){			
-				for (j=1; j<54; j++){
-					for (k=0; k<24; k++){
-						timeseries_data.push({
-							"value":0,
-							"week":j,
-							"hour":k,
-							"corridor":unique_corridors[i]
-							
-						});
-					}
-				}
+          );
+        dow_tod_requestHandle.then(dow_tod_requestSucceeded, requestFailed);
+
+		var woy_tod_requestHandle = esriRequest(
+            woy_tod_url,{
+			  responseType: "json"
 			}
-			for (i=0; i<returnsets.length; i++){
-				a=returnsets[i];
-				for (f=0;f<timeseries_data.length;f++){
-					if (timeseries_data[f].corridor ==a.attributes.Corridor&&timeseries_data[f].week ==a.attributes.Week && timeseries_data[f].hour==a.attributes.Hour){
-							timeseries_data[f].value=a.attributes.Congestion_Score;
-					}
-				}
-			}
-			hideIndicator();
-			chart.data=timeseries_data;
-		});		
-		///////////////xydynamic////////////////////////////////
-		query_dow_hour.where = condition;
-		query_dow_hour.orderByFields = ["DOW ASC, Hour ASC"];
-		dataLayer_dow_hour.queryFeatures(query_dow_hour).then(function(results){
-			let dataset=[];
-			
-			returnsets=results.features;
+          );
+        woy_tod_requestHandle.then(woy_tod_requestSucceeded, requestFailed);	
+
+        function dow_tod_requestSucceeded(response, io){
+			//console.log('DOW TOD :', response);
+			let returnsets=response.data.features;
 			let unique_corridor=[];
 			for (i=0; i<returnsets.length; i++){
 				a=returnsets[i];
@@ -604,8 +582,56 @@
 				
 			}
 			hideIndicator();
+			console.log("dow_hour ", timeseries_dataset);
 			chart_dow_hour.data=timeseries_dataset;
-		});
+        }	
+        function woy_tod_requestSucceeded(response, io){
+			//console.log('WOY TOD : ', response);
+			let returnsets=response.data.features;
+			let unique_corridors=[];
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				if (!unique_corridors.includes(a.attributes.Corridor)) {
+				  unique_corridors.push(a.attributes.Corridor);
+				}
+			}
+			let timeseries_data=[];	
+			for (i=0;i<unique_corridors.length; i++){			
+				for (j=1; j<54; j++){
+					for (k=0; k<24; k++){
+						timeseries_data.push({
+							"value":0,
+							"week":j,
+							"hour":k,
+							"corridor":unique_corridors[i]
+							
+						});
+					}
+				}
+			}
+			for (i=0; i<returnsets.length; i++){
+				a=returnsets[i];
+				for (f=0;f<timeseries_data.length;f++){
+					if (timeseries_data[f].corridor ==a.attributes.Corridor&&timeseries_data[f].week ==a.attributes.Week && timeseries_data[f].hour==a.attributes.Hour){
+							timeseries_data[f].value=a.attributes.Congestion_Score;
+					}
+				}
+			}
+			hideIndicator();
+			console.log("wk_hr: ", timeseries_data);
+			chart.data=timeseries_data;			
+
+        }		
+        function requestFailed(error, io){
+
+			let msg= dojoJson.toJson(error, true);
+			console.log(msg);
+
+        }		
+		///////////////xydynamic////////////////////////////////
+	
+		///////////////xydynamic////////////////////////////////
+
 	
 	}
 
